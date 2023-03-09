@@ -3,9 +3,9 @@
 #include <math.h>
 
 double** create_adj_matrix(double** centroids, int n, int d) {
-    double** adj_matrix = (double*) malloc(n * sizeof(double));
+    double** adj_matrix =  malloc(n * sizeof(double*));
     for (int i = 0; i < n; i++) {
-        adj_matrix[i] = (double*) malloc(n * sizeof(double));
+        adj_matrix[i] = malloc(n * sizeof(double));
         for (int j = 0; j < n; j++) {
             if (i == j) {
                 adj_matrix[i][j] = 0;
@@ -23,12 +23,14 @@ double** create_adj_matrix(double** centroids, int n, int d) {
 }
 
 double** create_degree_matrix(double** adj_matrix, int n) {
-    double** degree_matrix = (double*) malloc(n * sizeof(double));
+    double** degree_matrix = malloc(n * sizeof(double*));
     for (int i = 0; i < n; i++) {
-        degree_matrix[i] = (double*) malloc(n * sizeof(double));
+        degree_matrix[i] = malloc(n * sizeof(double));
         double degree = 0;
         for (int j = 0; j < n; j++) {
-            degree += adj_matrix[i][j];
+            if adj_matrix[i][j] >0{
+                degree += 1;
+            }
         }
         degree_matrix[i][i] = degree;
     }
@@ -37,9 +39,9 @@ double** create_degree_matrix(double** adj_matrix, int n) {
 
 
 double** create_laplacian_matrix(double** degree_matrix, double** adj_matrix, int n) {
-    double** laplacian_matrix = (double*) malloc(n * sizeof(double));
+    double** laplacian_matrix = malloc(n * sizeof(double*));
     for (int i = 0; i < n; i++) {
-        laplacian_matrix[i] = (double*) malloc(n * sizeof(double));
+        laplacian_matrix[i] = malloc(n * sizeof(double));
         for (int j = 0; j < n; j++) {
             laplacian_matrix[i][j] = degree_matrix[i][j] - adj_matrix[i][j];
         }
@@ -47,9 +49,10 @@ double** create_laplacian_matrix(double** degree_matrix, double** adj_matrix, in
     return laplacian_matrix;
 }
 
-void jacobi_rotation(double** A, int n, double** V) {
+void jacobi_rotation(double** A, int n) {
     int i, j, k;
     double p, y, t, c, s;
+    double** V = malloc(n * sizeof(double*));
     double* b = (double*) malloc(n * sizeof(double));
     double* z = (double*) malloc(n * sizeof(double));
     for (i = 0; i < n; i++) {
@@ -107,23 +110,32 @@ void jacobi_rotation(double** A, int n, double** V) {
     }
     free(b);
     free(z);
+    return V;
 }
-    
-double** create_eigenvectors(double** laplacian_matrix, int n) {
-    double** eigenvectors = (double*) malloc(n * sizeof(double));
+
+
+double** matrix_multiplication(double** A, double** B, int n) {
+    double** C = malloc(n * sizeof(double*));
     for (int i = 0; i < n; i++) {
-        eigenvectors[i] = (double*) malloc(n * sizeof(double));
+        C[i] = malloc(n * sizeof(double));
     }
-    jacobi_rotation(laplacian_matrix, n, eigenvectors);
-    return eigenvectors;
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            C[i][j] = 0;
+            for (int k = 0; k < n; k++) {
+                C[i][j] += A[i][k] * B[k][j];
+            }
+        }
+    }
+    return C;
 }
 
-
+//1.2.1 B
 void apply_rotation(double** A, double** V, int n) {
     int i, j, k;
-    double** B = (double*) malloc(n * sizeof(double));
+    double** B = malloc(n * sizeof(double*));
     for (i = 0; i < n; i++) {
-        B[i] = (double*) malloc(n * sizeof(double));
+        B[i] = malloc(n * sizeof(double));
     }
     
     for (i = 0; i < n; i++) {
@@ -161,3 +173,4 @@ int is_diagonal(double** A, int n) {
     }
     return 1; // Matrix is diagonal
 }
+
