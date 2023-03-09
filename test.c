@@ -119,3 +119,45 @@ double** create_eigenvectors(double** laplacian_matrix, int n) {
 }
 
 
+void apply_rotation(double** A, double** V, int n) {
+    int i, j, k;
+    double** B = (double*) malloc(n * sizeof(double));
+    for (i = 0; i < n; i++) {
+        B[i] = (double*) malloc(n * sizeof(double));
+    }
+    
+    for (i = 0; i < n; i++) {
+        for (j = 0; j < n; j++) {
+            B[i][j] = 0.0;
+            for (k = 0; k < n; k++) {
+                B[i][j] += V[k][i] * A[k][j];
+            }
+        }
+    }
+    
+    for (i = 0; i < n; i++) {
+        for (j = 0; j < n; j++) {
+            A[i][j] = 0.0;
+            for (k = 0; k < n; k++) {
+                A[i][j] += B[i][k] * V[k][j];
+            }
+        }
+    }
+    
+    for (i = 0; i < n; i++) {
+        free(B[i]);
+    }
+    free(B);
+}
+
+int is_diagonal(double** A, int n) {
+    int i, j;
+    for (i = 0; i < n; i++) {
+        for (j = 0; j < n; j++) {
+            if (i != j && A[i][j] != 0.0) {
+                return 0; // Matrix is not diagonal
+            }
+        }
+    }
+    return 1; // Matrix is diagonal
+}
