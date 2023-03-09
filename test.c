@@ -34,3 +34,15 @@ double** create_degree_matrix(double** adj_matrix, int n) {
     }
     return degree_matrix;
 }
+
+
+double** create_laplacian_matrix(double** degree_matrix, double** adj_matrix, int n) {
+    double** laplacian_matrix = (double*) malloc(n * sizeof(double));
+    for (int i = 0; i < n; i++) {
+        laplacian_matrix[i] = (double*) malloc(n * sizeof(double));
+        for (int j = 0; j < n; j++) {
+            laplacian_matrix[i][j] = degree_matrix[i][j] - adj_matrix[i][j];
+        }
+    }
+    return laplacian_matrix;
+}
