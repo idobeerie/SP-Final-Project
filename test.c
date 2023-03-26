@@ -183,23 +183,24 @@ int find_number_k(int n + 1, double ** res_d){   // find the number of clusters
 
 
 void jacobi(double** L, int n){
-    int iter = 0, i, j;
+    int iter = 0, i, j, rows, cols;
     double c, s;
     double current_off, prev_off = 0.0, epsi = 1.0*0.00001;  //global maybe?
     current_off = off(L, n);
     double** prev_L = L;
     double** rotation;
-    double** eigenVectors = malloc(n * sizeof(double*));
+    double** eigenVectors = malloc(n * sizeof(double*)); // just the vectors
+    double** eigenVecVal = malloc((n+1) * sizeof(double*)); // the first row will be the eigen values
     while(iter < 100 || prev_off - current_off > epsi){
         j = find_pivot(L, n)[1];
         i = find_pivot(L, n)[0];
-        rotation = find_rotation(L, n);
+        rotation = create_p(L, n);
         if(iter == 0){
             eigenVectors = rotation;
         }
         else{
             eigenVectors = matrix_multiply(eigenVectors, rotation, n);
-        }
+            }
         c = rotation[i][i];
         s = rotation[i][j];
         for(int k=0; k<n;k++){
@@ -216,9 +217,22 @@ void jacobi(double** L, int n){
         prev_off = current_off;
         current_off = off(L, n);
         prev_L = L;
+        //free(rotation);   here free the arrays ido
     }
 
-
+    for(rows = 0; rows < n + 1; rows++){
+        eigenVecVal[rows] = (double*)malloc(n * sizeof(double));
+        for(cols = 0; cols < n; cols++){
+            if(rows == 0){
+                eigenVecVal[rows][cols] = L[cols][cols];
+            }
+            else{
+                eigenVecVal[rows][cols] = L[rows][cols];
+            }
+        }
+    }
+    // free the eigenVectors matrix ido
+    // free the L matrix ido not sure though
 }
     
 
