@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <math.h>
 
-double** create_adj_matrix(double** centroids, int n, int d) {   // we need to remmeber to free this and also create X to be the centroids as a matrix
+double** wam(double** centroids, int n, int d) {   // we need to remmeber to free this and also create X to be the centroids as a matrix
     double** adj_matrix = (double*) malloc(n * sizeof(double));  
     double diff; 
     for (int i = 0; i < n; i++) {
@@ -31,7 +31,7 @@ void set_matrix_to_zero(double** matrix, int n) {    //helper function
     }
 }
 
-double** create_degree_matrix(double** adj_matrix, int n) {    // free this also!!!
+double** ddg(double** adj_matrix, int n) {    // free this also!!!
     double** degree_matrix = (double*) malloc(n * sizeof(double));
     set_matrix_to_zero(degree_matrix, n);  
     for (int i = 0; i < n; i++) {
@@ -48,7 +48,7 @@ double** create_degree_matrix(double** adj_matrix, int n) {    // free this also
 }
 
 
-double** create_laplacian_matrix(double** D, double** W, int n) {     // free this also!!!or not i dont have a clue rami is a benzona
+double** gl(double** D, double** W, int n) {     // free this also!!!or not i dont have a clue rami is a benzona
     double** laplacian_matrix = malloc(n * sizeof(double*));
     for (int i = 0; i < n; i++) {
         laplacian_matrix[i] = malloc(n * sizeof(double));
@@ -155,108 +155,69 @@ double** matrix_multiply(double** A, double** B, int n){   // multiply two matri
     return C;
 }
 
+double cmpfunc (const void * a, const void * b) {
+   return (*(double*)a - *(double*)b);
+}
 
-int find_number_k(int n, double ** res_d){   // find the number of clusters
-    int k;
-    double max_diff = 0.0;
+int find_number_k(int n + 1, double ** res_d){   // find the number of clusters
+    double k;    
+    k = 0.0;   //maybe nir is right and this is not allowed
     double* eigenVals = (double*) malloc(n * sizeof(double));
     for(int i = 0; i < n; i++){
-        eigenVals[i] = res_d[i][i];
+        eigenVals[i] = res_d[0][i];
     }
-    mergeSort(eigenVals, 0, n - 1);
-    for(int i = 1; i < n; i++){
-        if(eigenVals[i] - eigenVals[i - 1] > max_diff){
-            k = eigenVals[i] - eigenVals[i - 1];
-            break;
+    qsort(arr, n, sizeof(double), cmpfunc);
+    for(int i = 1; i <= n / 2; i++){
+        if(fabs(eigenVals[i] - eigenVals[i - 1]) > k){
+            k = fabs(eigenVals[i] - eigenVals[i - 1]);
         }
     }
-    
+    // free eigenVals
+    return (int)k;
 }
 
 
 
 
-void merge(int arr[], int l, int m, int r) // for sorting the eigenvalues
-{
-    int i, j, k;
-    int n1 = m - l + 1;
-    int n2 = r - m;
-  
-    /* create temp arrays */
-    int L[n1], R[n2];
-  
-    /* Copy data to temp arrays L[] and R[] */
-    for (i = 0; i < n1; i++)
-        L[i] = arr[l + i];
-    for (j = 0; j < n2; j++)
-        R[j] = arr[m + 1 + j];
-  
-    /* Merge the temp arrays back into arr[l..r]*/
-    i = 0; // Initial index of first subarray
-    j = 0; // Initial index of second subarray
-    k = l; // Initial index of merged subarray
-    while (i < n1 && j < n2) {
-        if (L[i] <= R[j]) {
-            arr[k] = L[i];
-            i++;
-        }
-        else {
-            arr[k] = R[j];
-            j++;
-        }
-        k++;
-    }
-  
-    /* Copy the remaining elements of L[], if there
-    are any */
-    while (i < n1) {
-        arr[k] = L[i];
-        i++;
-        k++;
-    }
-  
-    /* Copy the remaining elements of R[], if there
-    are any */
-    while (j < n2) {
-        arr[k] = R[j];
-        j++;
-        k++;
-    }
-}
-  
-void mergeSort(int arr[], int l, int r) // for sorting the eigenvalues
-{
-    if (l < r) {
-        // Same as (l+r)/2, but avoids overflow for
-        // large l and h
-        int m = l + (r - l) / 2;
-  
-        // Sort first and second halves
-        mergeSort(arr, l, m);
-        mergeSort(arr, m + 1, r);
-  
-        merge(arr, l, m, r);
-    }
-}
+
 
 
 void jacobi(double** L, int n){
-    int iter = 0;
+    int iter = 0, i, j;
+    double c, s;
     double current_off, prev_off = 0.0, epsi = 1.0*0.00001;  //global maybe?
     current_off = off(L, n);
-    double** rotation = create_p(L, n);
-    double** eigenVectors;
+    double** prev_L = L;
+    double** rotation;
+    double** eigenVectors = malloc(n * sizeof(double*));
     while(iter < 100 || prev_off - current_off > epsi){
-        //add the changing L
-        prev_off = current_off;
-        if(iter != 0){
-            eigenVectors = matrix_multiply(, , n);
+        j = find_pivot(L, n)[1];
+        i = find_pivot(L, n)[0];
+        rotation = find_rotation(L, n);
+        if(iter == 0){
+            eigenVectors = rotation;
         }
-        rotation = create_p(L, n);
-        current_off = off(L, n);
+        else{
+            eigenVectors = matrix_multiply(eigenVectors, rotation, n);
+        }
+        c = rotation[i][i];
+        s = rotation[i][j];
+        for(int k=0; k<n;k++){
+            L[i][k] = c*prev_L[i][k] - s*prev_L[j][k];
+            L[j][k] = s*prev_L[i][k] + c*prev_L[j][k];
+            L[k][i] = c*prev_L[k][i] - s*prev_L[k][j];
+            L[k][j] = s*prev_L[k][i] + c*prev_L[k][j];
+        }
+        L[i][i] = c*c*prev_L[i][i] - 2*c*s*prev_L[i][j] + s*s*prev_L[j][j];
+        L[j][j] = s*s*prev_L[i][i] + 2*c*s*prev_L[i][j] + c*c*prev_L[j][j];
+        L[i][j] = (c*c-s*s)*L[i][j] + c*s*(prev_L[i][i] - prev_L[j][j]);
+        L[j][i] = L[i][j];
         iter++;
+        prev_off = current_off;
+        current_off = off(L, n);
+        prev_L = L;
     }
-    
+
 
 }
     
