@@ -5,7 +5,7 @@
 
 
 double** wam(double** centroids, int n, int d) {   // we need to remmeber to free this and also create X to be the centroids as a matrix
-    double** adj_matrix = (double*) malloc(n * sizeof(double));  
+    double** adj_matrix = malloc(n * sizeof(double*));  
     double diff; 
     for (int i = 0; i < n; i++) {
         adj_matrix[i] = malloc(n * sizeof(double));
@@ -33,8 +33,8 @@ void set_matrix_to_zero(double** matrix, int n) {    //helper function
     }
 }
 
-double** ddg(double** adj_matrix, int n) {    // free this also!!!
-    double** degree_matrix = (double*) malloc(n * sizeof(double));
+double** ddg(double** adj_matrix, int n) {    
+    double** degree_matrix = malloc(n * sizeof(double*));
     set_matrix_to_zero(degree_matrix, n);  
     for (int i = 0; i < n; i++) {
         degree_matrix[i] = malloc(n * sizeof(double));
@@ -50,10 +50,9 @@ double** ddg(double** adj_matrix, int n) {    // free this also!!!
 }
 
 
-double** gl(double** D, double** W, int n) {     // free this also!!!or not i dont have a clue rami is a benzona
+double** gl(double** D, double** W, int n) {     // free this also
     double** laplacian_matrix = malloc(n * sizeof(double*));
     for (int i = 0; i < n; i++) {
-        laplacian_matrix[i] = malloc(n * sizeof(double));
         laplacian_matrix[i] = malloc(n * sizeof(double));
         for (int j = 0; j < n; j++) {
             laplacian_matrix[i][j] = D[i][j] - W[i][j];
