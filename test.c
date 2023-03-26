@@ -141,7 +141,7 @@ double** transpose(double** A, int n){   // transpose a matrix, free this also
     return A_t;
 }
 
-double** matrix_multiply(double** A, double** B, int n){   // multiply two matrices
+void matrix_multiply(double** A, double** B, int n){   // multiply two matrices
     double** C = (double*) malloc(n * sizeof(double*));
     for (int i = 0; i < n; i++) {
         C[i] = (double*) malloc(n * sizeof(double));
@@ -152,7 +152,18 @@ double** matrix_multiply(double** A, double** B, int n){   // multiply two matri
             }
         }
     }
-    return C;
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            A[i][j] = C[i][j];
+        }
+    }
+
+    // Finally, free C and return A
+    for (int i = 0; i < n; i++) {
+        free(C[i]);
+    }
+    free(C);
+    return;
 }
 
 double cmpfunc (const void * a, const void * b) {
@@ -160,7 +171,7 @@ double cmpfunc (const void * a, const void * b) {
 }
 
 
- int find_number_of_k(double** jacobi_res, int n+1){
+ int find_number_of_k(double** jacobi_res, int n){   // the jacobi_res is n+1 on n
     double k;
     k = 0.0;
     for(int i = 1; i <= n / 2; i++){
@@ -194,7 +205,7 @@ double cmpfunc (const void * a, const void * b) {
 // }
 
 
-void jacobi(double** L, int n){
+double** jacobi(double** L, int n){
     int iter = 0, i, j, rows, cols;
     double c, s;
     double current_off, prev_off = 0.0, epsi = 1.0*0.00001;  //global maybe?
@@ -211,7 +222,7 @@ void jacobi(double** L, int n){
             eigenVectors = rotation;
         }
         else{
-            eigenVectors = matrix_multiply(eigenVectors, rotation, n);
+            matrix_multiply(eigenVectors, rotation, n);
             }
         c = rotation[i][i];
         s = rotation[i][j];
@@ -242,8 +253,13 @@ void jacobi(double** L, int n){
             }
         }
     }
-    // free rotation
-    // free the eigenVectors 
+    for(rows = 0; rows < n; rows++){
+        free(rotation[rows]);
+        free(eigenVectors[rows]);
+    }
+    free(rotation);
+    free(eigenVectors);
+    return eigenVecVal;
 }
     
 
