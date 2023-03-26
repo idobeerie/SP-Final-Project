@@ -159,55 +159,39 @@ double cmpfunc (const void * a, const void * b) {
    return (*(double*)a - *(double*)b);
 }
 
-int find_number_k(int n + 1, double ** res_d){   // find the number of clusters
-    double k;   
-    double* indices = malloc(n * sizeof(double)); 
-    double** temp_matrix = malloc(n * sizeof(double*));
-    k = 0.0;   //maybe nir is right and this is not allowed
-    double* eigenVals = malloc(n * sizeof(double));
-    for(int i = 0; i < n; i++){
-        eigenVals[i] = res_d[0][i];
-        indices[i] = i;
-    }
-    qsort(eigenVals, n, sizeof(double), cmpfunc);
-    
+
+ int find_number_of_k(double** jacobi_res, int n+1){
+    double k;
+    k = 0.0;
     for(int i = 1; i <= n / 2; i++){
-        if(fabs(eigenVals[i] - eigenVals[i - 1]) > k){
-            k = fabs(eigenVals[i] - eigenVals[i - 1]);
+        if(fabs(jacobi_res[0][i] - jacobi_res[0][i - 1]) > k){
+            k = fabs(jacobi_res[0][i] - jacobi_res[0][i - 1]);
         }
     }
-
-    for (int i = 0; i < n; i++) {
-        int index = -1;
-        for (int j = 0; j < n; j++) {
-            if (res_d[0][j] == eigenvalues[i]) {
-                index = j;
-                break;
-            }
-        }
-        temp_matrix[i] = malloc(n * sizeof(double));
-
-        for (int j = 1; j < n+1; j++) {
-            //make this switch the columns
-        }
-
-        // copy the sorted matrix to the original matrix
-        for (int i = 0; i < n+1; i++) {
-            res_d[0][i] = eigenvalues[i];
-            for (int j = 0; j < n+1; j++) {
-                res_d[j][i] = temp_matrix[j][i];
-            }
-        }
-    }
-    // free eigenVals
-    //return res_d maybe and do another function for the k
     return (int)k;
+ }
+
+
+double** sort_jacobi(int n + 1, double ** res_d){   // find the number of clusters
+    double* temp = malloc((n + 1) * sizeof(double));
+    for (int i = 0; i < N; i++) {
+        for (int j = 0; j < n-i-1; j++) {
+            if (res_d[0][j] > res_d[0][j+1]) {
+                // Swap eigenvalues
+                temp[0] = res_d[0][j];
+                res_d[0][j] = res_d[0][j+1];
+                res_d[0][j+1] = temp[0];
+                // Swap eigenvectors
+                for (int k = 1; k < N+1; k++) {
+                    temp[k] = matrix[k][j];
+                    matrix[k][j] = matrix[k][j+1];
+                    matrix[k][j+1] = temp[k];
+                }
+            }
+        }
+    }
+    return res_d;
 }
-
-
-
-
-
 
 
 void jacobi(double** L, int n){
