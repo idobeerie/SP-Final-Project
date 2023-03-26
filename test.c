@@ -172,26 +172,26 @@ double cmpfunc (const void * a, const void * b) {
  }
 
 
-double** sort_jacobi(int n + 1, double ** res_d){   // find the number of clusters
-    double* temp = malloc((n + 1) * sizeof(double));
-    for (int i = 0; i < N; i++) {
-        for (int j = 0; j < n-i-1; j++) {
-            if (res_d[0][j] > res_d[0][j+1]) {
-                // Swap eigenvalues
-                temp[0] = res_d[0][j];
-                res_d[0][j] = res_d[0][j+1];
-                res_d[0][j+1] = temp[0];
-                // Swap eigenvectors
-                for (int k = 1; k < N+1; k++) {
-                    temp[k] = matrix[k][j];
-                    matrix[k][j] = matrix[k][j+1];
-                    matrix[k][j+1] = temp[k];
-                }
-            }
-        }
-    }
-    return res_d;
-}
+// double** sort_jacobi(int n + 1, double ** res_d){   
+//     double* temp = malloc((n + 1) * sizeof(double));
+//     for (int i = 0; i < N; i++) {
+//         for (int j = 0; j < n-i-1; j++) {
+//             if (res_d[0][j] > res_d[0][j+1]) {
+//                 // Swap eigenvalues
+//                 temp[0] = res_d[0][j];
+//                 res_d[0][j] = res_d[0][j+1];
+//                 res_d[0][j+1] = temp[0];
+//                 // Swap eigenvectors
+//                 for (int k = 1; k < N+1; k++) {
+//                     temp[k] = matrix[k][j];
+//                     matrix[k][j] = matrix[k][j+1];
+//                     matrix[k][j+1] = temp[k];
+//                 }
+//             }
+//         }
+//     }
+//     return res_d;
+// }
 
 
 void jacobi(double** L, int n){
@@ -229,7 +229,6 @@ void jacobi(double** L, int n){
         prev_off = current_off;
         current_off = off(L, n);
         prev_L = L;
-        //free(rotation);   here free the arrays ido
     }
 
     for(rows = 0; rows < n + 1; rows++){
@@ -243,8 +242,8 @@ void jacobi(double** L, int n){
             }
         }
     }
-    // free the eigenVectors matrix ido
-    // free the L matrix ido not sure though
+    // free rotation
+    // free the eigenVectors 
 }
     
 
