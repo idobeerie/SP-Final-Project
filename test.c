@@ -2,7 +2,22 @@
 #include <stdlib.h>
 #include <math.h>
 
-
+double** allocateNonSquareMatrix(size_t rows, size_t cols) {
+	double** matrix;
+	double* data;
+	size_t i;
+	if (!(matrix = malloc(sizeof(double*) * rows))) {
+		return NULL;
+	}
+	if (!(data = calloc(rows*cols, sizeof(double)))) {
+		free(matrix);
+		return NULL;
+	}
+	for (i = 0; i < rows; i++) {
+		matrix[i] = data + i * cols;
+	}
+	return matrix;
+}
 
 double** wam(double** centroids, int n, int d) {   // we need to remmeber to free this and also create X to be the centroids as a matrix
     double** adj_matrix = malloc(n * sizeof(double*));  
