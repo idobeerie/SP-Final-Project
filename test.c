@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <math.h>
 
-double** allocateNonSquareMatrix(size_t rows, size_t cols) {
+double** allocateNonSquareMatrix(size_t rows, size_t cols) {   // i really dont remember writing this, dont think we need it 
 	double** matrix;
 	double* data;
 	size_t i;
@@ -225,22 +225,23 @@ double** sort_u(int n, double ** res_d){  //remember the res_d is n+1 on n     n
         temp[i] = res_d[0][i];
     }
     k = find_number_of_k(temp, n);
+    free(temp);
     prev_min = curr_min - 1;
     for(i = 0; i < k; i++){
         res_u[i] = malloc(k * sizeof(double));
     }
-    for(i = 0; i < k; i++){
-      for(m = 0; m < n; m++){
-
-          
+    for(i = 0; i < k; i++){   // we want k eigenvectors
+      for(m = 1; m < n+1; m++){   // the first row in res_d is the eigenvalues
         for(j = 0; j < n; j++){
             if(res_d[0][j] <= curr_min && res_d[0][j] > prev_min && j != index_min){
                 index_min = j;
                 curr_min = res_d[0][j];
             }
         }
+        res_u[m - 1][i] = res_d[m][index_min];
       }
     }
+    return res_u;   // this is sorted by the eigenvalues, n*k, each row will be a point for the kmeans
 }
 
 void free_matrix(double** mat, int n) {
