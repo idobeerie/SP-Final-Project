@@ -1,7 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-
+#include <string.h>
+#include "spkmeans.h"
 
     
 int main(int argc, char* argv){   // this will be in spkmeans.c
