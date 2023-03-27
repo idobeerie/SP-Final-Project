@@ -187,9 +187,10 @@ double cmpfunc (const void * a, const void * b) {
 }
 
 
- int find_number_of_k(double** jacobi_res, int n){   // the jacobi_res is n+1 on n
+ int find_number_of_k(double** eigenVals, int n){   // the jacobi_res is n+1 on n
     double k;
     k = 0.0;
+    qsort(eigenVals[0], n, sizeof(double), cmpfunc);
     for(int i = 1; i <= n / 2; i++){
         if(fabs(jacobi_res[0][i] - jacobi_res[0][i - 1]) > k){
             k = fabs(jacobi_res[0][i] - jacobi_res[0][i - 1]);
@@ -206,26 +207,41 @@ void print_matrix(double** mat, int n, int m) {
         printf("\n");
     }
 }
-// double** sort_jacobi(int n + 1, double ** res_d){   
-//     double* temp = malloc((n + 1) * sizeof(double));
-//     for (int i = 0; i < N; i++) {
-//         for (int j = 0; j < n-i-1; j++) {
-//             if (res_d[0][j] > res_d[0][j+1]) {
-//                 // Swap eigenvalues
-//                 temp[0] = res_d[0][j];
-//                 res_d[0][j] = res_d[0][j+1];
-//                 res_d[0][j+1] = temp[0];
-//                 // Swap eigenvectors
-//                 for (int k = 1; k < N+1; k++) {
-//                     temp[k] = matrix[k][j];
-//                     matrix[k][j] = matrix[k][j+1];
-//                     matrix[k][j+1] = temp[k];
-//                 }
-//             }
-//         }
-//     }
-//     return res_d;
-// }
+double** sort_u(int n, double ** res_d){  //remember the res_d is n+1 on n     not finished
+    double* temp = malloc(n * sizeof(double));
+    double ** res_u = malloc(n * sizeof(double*));
+    int i, j, m;
+    double k;
+    double curr_min = res_d[0][0];
+    int index_min = 0;
+    double prev_min;  
+    for(i = 0; i < n; i++){
+        if(curr_min < res_d[0][i]){
+            curr_min = res_d[0][i];
+            index_min = i;
+        }
+    }
+    for(i = 0; i < n; i++){
+        temp[i] = res_d[0][i];
+    }
+    k = find_number_of_k(temp, n);
+    prev_min = curr_min - 1;
+    for(i = 0; i < k; i++){
+        res_u[i] = malloc(k * sizeof(double));
+    }
+    for(i = 0; i < k; i++){
+      for(m = 0; m < n; m++){
+
+          
+        for(j = 0; j < n; j++){
+            if(res_d[0][j] <= curr_min && res_d[0][j] > prev_min && j != index_min){
+                index_min = j;
+                curr_min = res_d[0][j];
+            }
+        }
+      }
+    }
+}
 
 void free_matrix(double** mat, int n) {
     for (int i = 0; i < n; i++) {
