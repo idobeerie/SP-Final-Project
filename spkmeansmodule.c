@@ -201,7 +201,7 @@ static PyObject* wam(PyObject* self, PyObject* args) {
             PyList_SetItem(row, j, PyFloat_FromDouble(wam_matrix[i][j]));
         }
     }
-    free_matrix(points_lst, no_points);
+    free_matrix(points_lst, no_points);  //this is n on d dont think it matters
     free_matrix(wam_matrix, no_points);
     return result;
 }
@@ -235,7 +235,7 @@ static PyObject* ddg(PyObject* self, PyObject* args) {
         free_matrix(points_lst, no_points);
         return NULL;
     }
-    double** ddg_matrix = ddg(points_lst, no_points, no_dims);
+    double** ddg_matrix = ddg(wam_matrix, no_points);
     if(!ddg_matrix) {
         PyErr_SetString(PyExc_MemoryError, "Could not allocate memory");
         free_matrix(points_lst, no_points);
@@ -283,14 +283,14 @@ static PyObject* gl(PyObject* self, PyObject* args) {
         free_matrix(wam_matrix, no_points);
         return NULL;
     }
-    double** ddg_matrix = ddg(points_lst, no_points, no_dims);
+    double** ddg_matrix = ddg(wam_matrix, no_points);
     if(!ddg_matrix) {
         PyErr_SetString(PyExc_MemoryError, "Could not allocate memory");
         free_matrix(points_lst, no_points);
         free_matrix(wam_matrix, no_points);
         return NULL;
     }
-    double** gl_matrix = gl(points_lst, no_points, no_dims);
+    double** gl_matrix = gl(ddg_matrix, wam_matrix, no_dims);
     if(!gl_matrix) {
         PyErr_SetString(PyExc_MemoryError, "Could not allocate memory");
         free_matrix(points_lst, no_points);
@@ -324,7 +324,7 @@ static PyObject* jacobi(PyObject* self, PyObject* args){
     size_t no_dims = PyObject_Length(point);
     size_t i,j;
 
-    double** points_lst = allocateNonSquareMatrix(no_points, no_dims);
+    double** points_lst = allocateNonSquareMatrix(no_points, no_dims);  // this will be square dont know if this is a problem
     if(!points_lst) {
         PyErr_SetString(PyExc_MemoryError, "Could not allocate memory");
         return NULL;
@@ -335,25 +335,8 @@ static PyObject* jacobi(PyObject* self, PyObject* args){
             points_lst[i][j] = PyFloat_AsDouble(PyList_GetItem(point, j));
         }
     }
-    double** wam_matrix = wam(points_lst, no_points, no_dims);
-    if(!wam_matrix) {
-        PyErr_SetString(PyExc_MemoryError, "Could not allocate memory");
-        free_matrix(points_lst, no_points);
-        return NULL;
-    }
-    double** ddg_matrix = ddg(points_lst, no_dims);
-    if(!ddg_matrix) {
-        PyErr_SetString(PyExc_MemoryError, "Could not allocate memory");
-        free_matrix(points_lst, no_points);
-        return NULL;
-    }
-    double** gl_matrix = gl(points_lst, no_dims);
-    if(!gl_matrix) {
-        PyErr_SetString(PyExc_MemoryError, "Could not allocate memory");
-        free_matrix(points_lst, no_points);
-        return NULL;
-    }
-    double** jacobi_matrix = jacobi(points_lst, no_dims);
+    
+    double** jacobi_matrix = jacobi(points_lst, no_dims); //maybe we do need to call wan ddg and lg not sure
     if(!jacobi_matrix) {
         PyErr_SetString(PyExc_MemoryError, "Could not allocate memory");
         free_matrix(points_lst, no_points);
@@ -368,9 +351,34 @@ static PyObject* jacobi(PyObject* self, PyObject* args){
         }
     }
     free_matrix(points_lst, no_points);
-    free_matrix(wam_matrix, no_points);
-    free_matrix(ddg_matrix, no_points);
-    free_matrix(gl_matrix, no_points);
-    free_matrix(jacobi_matrix, no_points);
+    free_matrix(jacobi_matrix, no_points);   
     return result;
+}
+
+static PyMethodDef methods[] = {
+    {"spk",(PyCFunction)fit, METH_VARARGS, PyDoc_STR("takes 2 python lists, max iteration value, Convergence value")},
+    {"wam",(PyCFunction)wam,METH_VARARGS,PyDoc_STR("takes points list(2D), returns the weight adjacency matrix")},
+    {"ddg",(PyCFunction)ddg,METH_VARARGS,PyDoc_STR("takes points list(2D), returns the diagonal degree matrix")},
+    {"gl",(PyCFunction)gl,METH_VARARGS,PyDoc_STR("takes points list(2D), returns the graph laplacian matrix")},
+    {"jacobi",(PyCFunction)jacobi,METH_VARARGS,PyDoc_STR("jacobis on a symmetric matrix,second argument should be \"sorted\" for spk purposes\n, returns(values,vectors matrix,k)")},
+      /*  The docstring for the function */
+    {NULL, NULL, 0, NULL}     
+    //dont we need here also the kmeans? 
+};
+
+static struct PyModuleDef mykmeanssp = {
+    PyModuleDef_HEAD_INIT,
+    "spkmeansmodule", /* name of module */
+    NULL, /* module documentation, may be NULL */
+    -1,  /* size of per-interpreter state of the module, or -1 if the module keeps state in global variables. */
+    methods /* the PyMethodDef array from before containing the methods of the extension */
+};
+
+PyMODINIT_FUNC PyInit_mykmeanssp(void) {
+    PyObject* m;
+    m = PyModule_Create(&mykmeanssp);
+    if (!m) {
+        return NULL;
+    }
+    return m;
 }
