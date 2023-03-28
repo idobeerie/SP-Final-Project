@@ -207,7 +207,7 @@ void print_matrix(double** mat, int n, int m) {
         printf("\n");
     }
 }
-double** sort_u(int n, double ** res_d){  //remember the res_d is n+1 on n     not finished
+double** sort_u(int n, double ** res_d){  //remember the res_d is n+1 on n     not finished!! i need to fix this maybe has a bug
     double* temp = malloc(n * sizeof(double));
     double ** res_u = malloc(n * sizeof(double*));
     int i, j, m;

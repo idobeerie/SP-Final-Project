@@ -2,7 +2,7 @@
 #include <Python.h>
 #include "spkmeans.h"
 
-int free_memory(double* a, double* b, double* c, double** new_cluster, double** cluster_mean, double** data) {
+int free_memory(double* a, double* b, double* c, double** new_cluster, double** cluster_mean, double** data) {   //this is shit we dont want this 
     if(a) {
         free(a);
     }
@@ -33,7 +33,7 @@ double euclidean_distance(double* a, double* b, size_t no_dims) {
     return sqrt(dist);
 }
 
-static PyObject* fit(PyObject* self, PyObject* args) {
+static PyObject* fit(PyObject* self, PyObject* args) {    //not fit maybe just call it spkcluster or something and see if this is ok with the code we did
     PyObject* centroids;
     PyObject* data;
     PyObject* point;
@@ -161,7 +161,7 @@ static PyObject* fit(PyObject* self, PyObject* args) {
             PyList_SetItem(centroid, j, PyFloat_FromDouble(cluster_mean[i][j]));
         }
     }
-    free_memory(b,c, a, new_cluster, cluster_mean, data);
+    free_memory(b,c, a, new_cluster, cluster_mean, data);  //change this we dont have this function !!!!
     return result;
 }
 
