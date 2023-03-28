@@ -37,9 +37,10 @@ static PyObject* fit(PyObject* self, PyObject* args) {    //not fit maybe just c
     PyObject* centroids;
     PyObject* data;
     PyObject* point;
-    size_t iter;
-    double epsilon;
-    if(!PyArg_ParseTuple(args, "OOnd", &centroids, &data, &iter, &epsilon, &point, )) {
+    int k;
+    size_t iter = 300;
+    double epsilon = 0.0;
+    if(!PyArg_ParseTuple(args, "OOi", &centroids, &data)) {
         PyErr_SetString(PyExc_TypeError, "Invalid arguments");
         return NULL;
     }
@@ -354,6 +355,7 @@ static PyObject* jacobi(PyObject* self, PyObject* args){
     free_matrix(jacobi_matrix, no_points);   
     return result;
 }
+
 
 static PyMethodDef methods[] = {
     {"spk",(PyCFunction)fit, METH_VARARGS, PyDoc_STR("takes 2 python lists, max iteration value, Convergence value")},
