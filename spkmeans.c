@@ -1,7 +1,9 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
 
+#include "spkmeans.h"
+
+int main(){
+    return 0;
+}
 double** allocateNonSquareMatrix(size_t rows, size_t cols) {   // i really dont remember writing this, dont think we need it 
 	double** matrix;
 	double* data;
@@ -55,7 +57,7 @@ double** ddg(double** adj_matrix, int n) {
         degree_matrix[i] = malloc(n * sizeof(double));
         double degree = 0;
         for (int j = 0; j < n; j++) {
-            if adj_matrix[i][j] >0{
+            if (adj_matrix[i][j] >0){
                 degree += 1;
             }
         }
@@ -79,7 +81,7 @@ double** gl(double** D, double** W, int n) {     // free this also
 
 int* find_pivot(double** matrix, int n) {    // free this
     double max_abs = 0.0;
-    int pivot[2] = {0, 0};   
+    int* pivot = malloc(2 * sizeof(int));   
     int max_i = 0, max_j = 0;
     for (int i = 0; i < n; i++) {   
         for (int j = i; j < n; j++) {
@@ -112,7 +114,6 @@ double* calculate_c_s(double ii, double jj, double ij) {   // free this
 }
 
 double** create_p(double** A, int n){   // create the rotation matrix, we need to see how we want to use it and free it, maybe we want to put this in the main function
-    double teta, c, s, t;
     double** p = malloc(n * sizeof(double*));
     for (int i = 0; i < n; i++) {
         p[i] = (double*) malloc(n * sizeof(double));
@@ -147,9 +148,9 @@ double off(double** A, int n){   // calculate the off diagonal sum of the matrix
 }
 
 double** transpose(double** A, int n){   // transpose a matrix, free this also
-    double** A_t = (double*) malloc(n * sizeof(double*));
+    double** A_t =  malloc(n * sizeof(double*));
     for (int i = 0; i < n; i++) {
-        A_t[i] = (double*) malloc(n * sizeof(double));
+        A_t[i] =  malloc(n * sizeof(double));
         for (int j = 0; j < n; j++) {
             A_t[i][j] = A[j][i];
         }
@@ -158,9 +159,9 @@ double** transpose(double** A, int n){   // transpose a matrix, free this also
 }
 
 void matrix_multiply(double** A, double** B, int n){   // multiply two matrices
-    double** C = (double*) malloc(n * sizeof(double*));
+    double** C = malloc(n * sizeof(double*));
     for (int i = 0; i < n; i++) {
-        C[i] = (double*) malloc(n * sizeof(double));
+        C[i] =  malloc(n * sizeof(double));
         for (int j = 0; j < n; j++) {
             C[i][j] = 0;
             for (int k = 0; k < n; k++) {
@@ -182,18 +183,25 @@ void matrix_multiply(double** A, double** B, int n){   // multiply two matrices
     return;
 }
 
-double cmpfunc (const void * a, const void * b) {
-   return (*(double*)a - *(double*)b);
+int cmpfunc (const void * a, const void * b) {
+    double res = *(double*)a - *(double*)b;
+    if(res > 0){
+        return 1;
+    }
+    if(res < 0){
+        return -1;
+    }
+    return 0;
 }
 
 
- int find_number_of_k(double** eigenVals, int n){   // the jacobi_res is n+1 on n
+ int find_number_of_k(double* eigenVals, int n){   // the jacobi_res is n+1 on n
     double k;
     k = 0.0;
-    qsort(eigenVals[0], n, sizeof(double), cmpfunc);
+    qsort(eigenVals, n, sizeof(double), cmpfunc);
     for(int i = 1; i <= n / 2; i++){
-        if(fabs(jacobi_res[0][i] - jacobi_res[0][i - 1]) > k){
-            k = fabs(jacobi_res[0][i] - jacobi_res[0][i - 1]);
+        if(fabs(eigenVals[i] - eigenVals[i - 1]) > k){
+            k = fabs(eigenVals[i] - eigenVals[i - 1]);
         }
     }
     return (int)k;

@@ -1,8 +1,10 @@
 #define PY_SSIZE_T_CLEAN
+#include <math.h>
 #include <Python.h>
 #include "spkmeans.h"
 
-int free_memory(double* a, double* b, double* c, double** new_cluster, double** cluster_mean, double** data) {   //this is shit we dont want this 
+
+int free_memory(double* a, double* b, double* c, double** new_cluster, double** cluster_mean, double** data) {   
     if(a) {
         free(a);
     }
@@ -40,7 +42,7 @@ static PyObject* fit(PyObject* self, PyObject* args) {    //not fit maybe just c
     int k;
     size_t iter = 300;
     double epsilon = 0.0;
-    if(!PyArg_ParseTuple(args, "OOi", &centroids, &data)) {
+    if(!PyArg_ParseTuple(args, "OO", &centroids, &data)) {
         PyErr_SetString(PyExc_TypeError, "Invalid arguments");
         return NULL;
     }
@@ -52,38 +54,38 @@ static PyObject* fit(PyObject* self, PyObject* args) {    //not fit maybe just c
     double* a = NULL;
     double* b = NULL;
     double* c = NULL;
-    double** data = NULL;
+    double** pts = NULL;
     double** cluster_mean = NULL;
     double** new_cluster = NULL;
     size_t j, m, i;
-    data = calloc(no_points, sizeof(double*));
-    if(!data) {
+    pts = calloc(no_points, sizeof(double*));
+    if(!pts) {
         PyErr_SetString(PyExc_MemoryError, "Could not allocate memory");
-        free_memory(b,c, a, new_cluster, cluster_mean, data);
+        free_memory(b,c, a, new_cluster, cluster_mean, pts);
         return NULL;
     }
-    p = NULL;
+    double* p = NULL;
     p = (double*)calloc(no_points * no_dims, sizeof(double));
     if(!p) {
         PyErr_SetString(PyExc_MemoryError, "Could not allocate memory");
-        free_memory(b,c, a, new_cluster, cluster_mean, data);
+        free_memory(b,c, a, new_cluster, cluster_mean, pts);
         return NULL;
     }
     for(i = 0; i < no_points; i++) {
-        data[i] = p + i * no_dims;
+        pts[i] = p + i * no_dims;
     }
 
     for(i = 0; i < no_points; i++) {
         point = PyList_GetItem(data, i);
         for(j = 0; j < no_dims; j++) {
-            data[i][j] = PyFloat_AsDouble(PyList_GetItem(point, j));
+            pts[i][j] = PyFloat_AsDouble(PyList_GetItem(point, j));
         }
     }
     b = calloc(no_centroids * no_dims, sizeof(double));
     cluster_mean = calloc(no_centroids, sizeof(double*));
     if(!b || !cluster_mean) {
         PyErr_SetString(PyExc_MemoryError, "Could not allocate memory");
-        free_memory(b,c, a, new_cluster, cluster_mean, data);
+        free_memory(b,c, a, new_cluster, cluster_mean, pts);
         return NULL;
     }
     for(i = 0; i < no_centroids; i++) {
@@ -96,12 +98,12 @@ static PyObject* fit(PyObject* self, PyObject* args) {    //not fit maybe just c
         }
     }
 
-    double** curr_X = data;
+    double** curr_X = pts;
     c = calloc(no_centroids * (1 + no_dims), sizeof(double));
     new_cluster = calloc(no_centroids, sizeof(double*));
     if(!c || !new_cluster) {
         PyErr_SetString(PyExc_MemoryError, "Could not allocate memory");
-        free_memory(b,c, a, new_cluster, cluster_mean, data);
+        free_memory(b,c, a, new_cluster, cluster_mean, pts);
         return NULL;
     }
     for(i = 0; i < no_centroids; i++) {
