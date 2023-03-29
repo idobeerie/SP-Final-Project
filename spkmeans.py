@@ -1,8 +1,45 @@
 import pandas as pd
 import numpy as np
 import sys
+import math
+import os
+import random
 import kymeanssp as km
 
+
+def distance(arr1, arr2):
+    d = 0
+    for index in range(0,len(arr1)):
+        d += math.pow((float(arr1[index]) - float(arr2[index])), 2)
+    d = math.sqrt(d)
+    return d
+
+def selectNextCentroid(data, centroids, indexes):
+    min_distances = []
+    distances_from_centroids = []
+    for dataPoint in data:
+        for centroid in centroids:
+            distances_from_centroids.append(distance(dataPoint, centroid))
+        min_distances.append(min(distances_from_centroids))
+        distances_from_centroids = []
+    probabilities = []
+    for i in indexes:
+        probabilities.append(min_distances[indexes.index(i)] / sum(min_distances))
+    chosen = np.random.choice(indexes, p=probabilities)
+    return data[indexes.index(chosen)], chosen
+
+def kmeansPlusPlus(data, k, indexes):
+    result_indexes = ""
+    centroids = []
+    centroid = data[indexes.index(np.random.choice(indexes))]
+    centroids.append(centroid)
+    result_indexes += f"{indexes[data.index(centroid)]}, "
+    for i in range(1, k):
+        new_centroid, index = selectNextCentroid(data, centroids, indexes)
+        centroids.append(new_centroid)
+        result_indexes += f"{index}, "
+    print(result_indexes[:-2])
+    return centroids
 np.random.seed(0)
 eps = 0.0
 k = 0
@@ -19,8 +56,18 @@ elif len(sys.argv) == 3:
     goal = sys.argv[1]
     filename = sys.argv[2]
 
+centroids = []
+min_index = 0
+min_d = sys.float_info.max
+current_d = 0
+members_count = []
+count = 0
+temp_clusters = []
+data = []
 
-def create_centroids(data, k):
+
+
+def create_centroids(data, k):   #the datais U
     centroids = []
     indices = []
 
@@ -43,27 +90,27 @@ def create_centroids(data, k):
     return pd.DataFrame(centroids), indices
 
 if goal =='spk':
-    df = pd.read_csv(filename, header=None)
+    df = pd.read_csv(filename, header=None, dtype=float)
     X = df.values.tolist()
     L = mk.gl(X)
+    jacobi_vals = km.jacobi(L)
+    eigen_vals = jacobi_vals[0].copy()
+    eigen_vals = np.array(eigen_vals)
+    eigen_vals = np.sort(eigen_vals)
     if k == 0:
-        jacobi_vals = km.jacobi(L)
-        eigen_vals = jacobi_vals[0].copy()
-        eigen_vals = np.array(eigen_vals)
-        eigen_vals = np.sort(eigen_vals)
         eigen_vals_cut = eigen_vals[:len(eigen_vals) /2]
         max_dif = sys.float_info.min
         for i in range(0,len(eigen_vals_cut)-1):
             if float(eigen_vals_cut[i+1] - eigen_vals_cut[i]) > max_dif:
                 max_dif = float(eigen_vals_cut[i+1] - eigen_vals_cut[i])
         k = math.floor(max_dif)
-        i = np.argsort(jacobi_vals[0])
-        U = jacobi_vals[:,i]
-        U = U[1:,:k+1]
-        start_centroids, start_indices = create_centroids(pd.DataFrame(U), k)
-    starting_centroids = start_centroids.values.tolist()
-
-    kmeans_result = km.spk(U, starting_centroids)
+    i = np.argsort(jacobi_vals[0])
+    U = jacobi_vals[:,i]
+    U = U[1:,:k+1]
+    U_lst = U.tolist()
+    start_indices, start_centroids = create_centroids(U, k)
+    start_centroids = start_centroids.tolist()
+    kmeans_result = km.spk(U_lst, start_centroids, 0.0)   
 
     print(",".join(f'{x:.0f}' for x in start_indices))
 
@@ -71,7 +118,7 @@ if goal =='spk':
         print(",".join(f'{x:.0f}' for x in cluster))
     
     if goal in["gl", "ddg", "wam"]:
-        df = pd.read_csv(filename, header=None)
+        df = pd.read_csv(filename, header=None, dtype=float)
         X = df.values.tolist()
         if "goal" == "gl":
             mat = km.gl(X)
@@ -83,7 +130,7 @@ if goal =='spk':
             print(",".join(f'{x:.4f}' for x in row))
 
 if goal == "jacobi":
-    sym_df = pd.read_csv(filename, header=None)
+    sym_df = pd.read_csv(filename, header=None, dtype=float)
     sym_mat = sym_df.values.tolist()
     jacobi_vals, jacobi_vectors, k = km.jacobi(sym_mat, 0)
     print(",".join(f'{x:.4f}' for x in jacobi_vals))
