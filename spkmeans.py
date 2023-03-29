@@ -47,7 +47,7 @@ if goal =='spk':
     X = df.values.tolist()
     L = mk.gl(X)
     if k == 0:
-        jacobi_vals = km.jacobi(L, 0)
+        jacobi_vals = km.jacobi(L)
         eigen_vals = jacobi_vals[0].copy()
         eigen_vals = np.array(eigen_vals)
         eigen_vals = np.sort(eigen_vals)
