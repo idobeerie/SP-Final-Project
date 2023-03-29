@@ -31,7 +31,7 @@ int cmpfunc (const void * a, const void * b);
 
 void print_matrix(double** mat, int n, int m) ;
 
-void free_matrix(double** mat, int n);
+void free_matrix(double** mat);
 
 double** jacobi(double** L, int n);
 

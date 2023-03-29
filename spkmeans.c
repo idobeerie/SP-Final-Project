@@ -51,12 +51,13 @@ void set_matrix_to_zero(double** matrix, int n) {    //helper function
 double** ddg(double** adj_matrix, int n) {    
     double** degree_matrix = allocateMatrix(n, n);
     double degree = 0;
+    // print_matrix(adj_matrix, n, n);
     set_matrix_to_zero(degree_matrix, n);  
     for (int i = 0; i < n; i++) {
         degree = 0;
         for (int j = 0; j < n; j++) {
             if (adj_matrix[i][j] >0){
-                degree += 1;
+                degree += adj_matrix[i][j];
             }
         }
         degree_matrix[i][i] = degree;
@@ -73,8 +74,8 @@ double** gl(double** D, double** W, int n) {
             laplacian_matrix[i][j] = D[i][j] - W[i][j];
         }
     }
-    free_matrix(D, n);
-    free_matrix(W, n);
+    free_matrix(D);
+    free_matrix(W);
     return laplacian_matrix;
 }
 
@@ -211,9 +212,10 @@ int cmpfunc (const void * a, const void * b) {
 
 void print_matrix(double** mat, int n, int m) {
     for (int i = 0; i < n; i++) {
-        for (int j = 0; j < m; j++) {
-            printf("%f ", mat[i][j]);
+        for (int j = 0; j < m-1; j++) {
+            printf("%.4f,", mat[i][j]);
         }
+        printf("%.4f", mat[i][m-1]);
         printf("\n");
     }
 }
@@ -254,10 +256,7 @@ void print_matrix(double** mat, int n, int m) {
 //     return res_u;   // this is sorted by the eigenvalues, n*k, each row will be a point for the kmeans
 // }
 
-void free_matrix(double** mat, int n) {
-    for (int i = 0; i < n; i++) {
-        free(mat[i]);
-    }
+void free_matrix(double** mat) {
     free(mat);
 }
 
@@ -315,7 +314,7 @@ double** jacobi(double** L, int n){
     }
     free(rotation);
     free(eigenVectors);
-    free_matrix(prev_L, n);
+    free_matrix(prev_L);
 
     return eigenVecVal;
 }

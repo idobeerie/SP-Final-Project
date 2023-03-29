@@ -24,24 +24,25 @@ int main(int argc, char** argv){
     }
     goal = argv[1];  
     sepereator = fgetc(fp);
-    while(sepereator != '\n' || sepereator != EOF){
+    while(sepereator != '\n' && sepereator != EOF){
         if(sepereator == ','){
             d++;
         }
+        sepereator = fgetc(fp);
     }
+    d++;
     rewind(fp);
     for (sepereator = getc(fp); sepereator != EOF; sepereator = getc(fp)){
         if (sepereator == '\n'){ // Increment count if this character is newline
             n = n + 1;
         }
     }
-    centroids = malloc(n * sizeof(double*));
-    for(int i = 0; i < n; i++){
-        centroids[i] = malloc(d * sizeof(double));
-    }
+    centroids = allocateMatrix(n, d);
+    rewind(fp);
     for(int i = 0; i < n; i++){
         for(int j = 0; j < d; j++){
             fscanf(fp, "%lf,", &centroids[i][j]);
+        
         }
     }
     fclose(fp);
@@ -49,30 +50,30 @@ int main(int argc, char** argv){
     if(strcmp("jacobi", goal) == 0){
         jacobi_res = jacobi(centroids, n);
         print_matrix(jacobi_res, n+1, n);
-        free_matrix(jacobi_res, n+1);
-        free_matrix(centroids, n);
+        free_matrix(jacobi_res);
+        free_matrix(centroids);
         return 1;
     }
     adj_matrix = wam(centroids, n, d);
     degree_matrix = ddg(adj_matrix, n);
     if(strcmp("wam", goal) == 0){
         print_matrix(adj_matrix, n, n);
-        free_matrix(adj_matrix, n);
+        free_matrix(adj_matrix);
     }
     else if(strcmp("ddg", goal) == 0){
         print_matrix(degree_matrix, n, n);
-        free_matrix(adj_matrix, n);
-        free_matrix(degree_matrix, n);
+        free_matrix(adj_matrix);
+        free_matrix(degree_matrix);
     }
     else if(strcmp("gl", goal) == 0){
         laplacian = gl(adj_matrix, degree_matrix, n);
         print_matrix(laplacian, n, n);
-        free_matrix(laplacian, n);
+        free_matrix(laplacian);
     }
     else{
         printf("invalid goal");
     }
-    free_matrix(centroids, n);
+    free_matrix(centroids);
     return 1;  
 }
 

@@ -112,10 +112,10 @@ if goal =='spk':
     start_centroids = start_centroids.tolist()
     kmeans_result = km.spk(U_lst, start_centroids, 0.0)   
 
-    print(",".join(f'{x:.0f}' for x in start_indices))
+    # print(",".join(f'{x:.0f}' for x in start_indices))
 
     for cluster in kmeans_result:
-        print(",".join(f'{x:.0f}' for x in cluster))
+        # print(",".join(f'{x:.0f}' for x in cluster))
     
     if goal in["gl", "ddg", "wam"]:
         df = pd.read_csv(filename, header=None, dtype=float)
@@ -127,12 +127,12 @@ if goal =='spk':
         elif goal == "wam":
             mat = km.wam(X)
         for row in mat:
-            print(",".join(f'{x:.4f}' for x in row))
+            # print(",".join(f'{x:.4f}' for x in row))
 
 if goal == "jacobi":
     sym_df = pd.read_csv(filename, header=None, dtype=float)
     sym_mat = sym_df.values.tolist()
     jacobi_vals, jacobi_vectors, k = km.jacobi(sym_mat, 0)
-    print(",".join(f'{x:.4f}' for x in jacobi_vals))
+    # print(",".join(f'{x:.4f}' for x in jacobi_vals))
     for row in jacobi_vectors:
-        print(",".join(f'{x:.4f}' for x in row))
+        # print(",".join(f'{x:.4f}' for x in row))
