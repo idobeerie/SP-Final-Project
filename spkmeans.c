@@ -136,6 +136,7 @@ double** create_p(double** A, int n){   // create the rotation matrix, we need t
     p[pivot[1]][pivot[0]] = -c_s[1];
     p[pivot[1]][pivot[1]] = c_s[0];
     free(pivot);
+    free(c_s);
     return p;   
 }
 
@@ -200,17 +201,17 @@ int cmpfunc (const void * a, const void * b) {
 }
 
 
- int find_number_of_k(double* eigenVals, int n){   // the jacobi_res is n+1 on n
-    double k;
-    k = 0.0;
-    qsort(eigenVals, n, sizeof(double), cmpfunc);
-    for(int i = 1; i <= n / 2; i++){
-        if(fabs(eigenVals[i] - eigenVals[i - 1]) > k){
-            k = fabs(eigenVals[i] - eigenVals[i - 1]);
-        }
-    }
-    return (int)k;
- }
+//  int find_number_of_k(double* eigenVals, int n){   // the jacobi_res is n+1 on n
+//     double k;
+//     k = 0.0;
+//     qsort(eigenVals, n, sizeof(double), cmpfunc);
+//     for(int i = 1; i <= n / 2; i++){
+//         if(fabs(eigenVals[i] - eigenVals[i - 1]) > k){
+//             k = fabs(eigenVals[i] - eigenVals[i - 1]);
+//         }
+//     }
+//     return (int)k;
+//  }
 
 void print_matrix(double** mat, int n, int m) {
     for (int i = 0; i < n; i++) {
@@ -220,42 +221,42 @@ void print_matrix(double** mat, int n, int m) {
         printf("\n");
     }
 }
-double** sort_u(int n, double ** res_d){  //remember the res_d is n+1 on n     not finished!! i need to fix this maybe has a bug
-    double* temp = malloc(n * sizeof(double));
-    double ** res_u = malloc(n * sizeof(double*));
-    int i, j, m;
-    double k;
-    double curr_min = res_d[0][0];
-    int index_min = 0;
-    double prev_min;  
-    for(i = 0; i < n; i++){
-        if(curr_min < res_d[0][i]){
-            curr_min = res_d[0][i];
-            index_min = i;
-        }
-    }
-    for(i = 0; i < n; i++){
-        temp[i] = res_d[0][i];
-    }
-    k = find_number_of_k(temp, n);
-    free(temp);
-    prev_min = curr_min - 1;
-    for(i = 0; i < k; i++){
-        res_u[i] = malloc(k * sizeof(double));
-    }
-    for(i = 0; i < k; i++){   // we want k eigenvectors
-      for(m = 1; m < n+1; m++){   // the first row in res_d is the eigenvalues
-        for(j = 0; j < n; j++){
-            if(res_d[0][j] <= curr_min && res_d[0][j] > prev_min && j != index_min){
-                index_min = j;
-                curr_min = res_d[0][j];
-            }
-        }
-        res_u[m - 1][i] = res_d[m][index_min];
-      }
-    }
-    return res_u;   // this is sorted by the eigenvalues, n*k, each row will be a point for the kmeans
-}
+// double** sort_u(int n, double ** res_d){  //remember the res_d is n+1 on n     not finished!! i need to fix this maybe has a bug
+//     double* temp = malloc(n * sizeof(double));
+//     double ** res_u = malloc(n * sizeof(double*));
+//     int i, j, m;
+//     double k;
+//     double curr_min = res_d[0][0];
+//     int index_min = 0;
+//     double prev_min;  
+//     for(i = 0; i < n; i++){
+//         if(curr_min < res_d[0][i]){
+//             curr_min = res_d[0][i];
+//             index_min = i;
+//         }
+//     }
+//     for(i = 0; i < n; i++){
+//         temp[i] = res_d[0][i];
+//     }
+//     k = find_number_of_k(temp, n);
+//     free(temp);
+//     prev_min = curr_min - 1;
+//     for(i = 0; i < k; i++){
+//         res_u[i] = malloc(k * sizeof(double));
+//     }
+//     for(i = 0; i < k; i++){   // we want k eigenvectors
+//       for(m = 1; m < n+1; m++){   // the first row in res_d is the eigenvalues
+//         for(j = 0; j < n; j++){
+//             if(res_d[0][j] <= curr_min && res_d[0][j] > prev_min && j != index_min){
+//                 index_min = j;
+//                 curr_min = res_d[0][j];
+//             }
+//         }
+//         res_u[m - 1][i] = res_d[m][index_min];
+//       }
+//     }
+//     return res_u;   // this is sorted by the eigenvalues, n*k, each row will be a point for the kmeans
+// }
 
 void free_matrix(double** mat, int n) {
     for (int i = 0; i < n; i++) {

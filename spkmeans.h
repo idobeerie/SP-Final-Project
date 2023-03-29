@@ -29,11 +29,7 @@ void matrix_multiply(double** A, double** B, int n);
 
 int cmpfunc (const void * a, const void * b);
 
-int find_number_of_k(double* eigenVals, int n);
-
 void print_matrix(double** mat, int n, int m) ;
-
-double** sort_u(int n, double ** res_d);
 
 void free_matrix(double** mat, int n);
 
