@@ -1,9 +1,11 @@
 #include "spkmeans.h"
 
+
     
 int main(int argc, char* argv){   // this will be in spkmeans.c
     FILE* fp;
-    int d, int n, int sepCount;
+    int d, n;
+    n = 0;
     d = 0;
     double** laplacian;
     double** centroids;
@@ -11,7 +13,7 @@ int main(int argc, char* argv){   // this will be in spkmeans.c
     double** degree_matrix;
     double** jacobi_res;
     char sepereator;
-    char* goal;
+    char* goal = malloc(10 * sizeof(char));
     if(argc != 3){
         printf("not enough arguments, sory");
         return 1;
@@ -22,27 +24,25 @@ int main(int argc, char* argv){   // this will be in spkmeans.c
         return 1;
     }
     goal = argv[1];  
-    while(sepereator = fgetc(fp) != EOF && sepereator != '\n'){  // maybe do \n differently for nova 
+    sepereator = fgetc(fp);
+    while(sepereator != '\n' || sepereator != EOF){
         if(sepereator == ','){
             d++;
         }
     }
-    sepCount = d - 1;
-    while (sepereator = fgetc(fp) != EOF) {
-        if(sepereator == ','){
-            sepCount++;
+    rewind(fp);
+    for (sepereator = getc(fp); sepereator != EOF; sepereator = getc(fp)){
+        if (sepereator == '\n'){ // Increment count if this character is newline
+            n = n + 1;
         }
     }
-    n = sepCount / (d - 1);  // maybe not d-1 i dont know
-    rewind(fp);
     centroids = malloc(n * sizeof(double*));
     for(int i = 0; i < n; i++){
         centroids[i] = malloc(d * sizeof(double));
+    }
+    for(int i = 0; i < n; i++){
         for(int j = 0; j < d; j++){
-            if(fscanf(fp, "%lf", &centroids[i][j])){
-                printf("error reading file");
-                return 1;
-            }
+            fscanf(fp, "%lf", &centroids[i][j]);
         }
     }
     fclose(fp);

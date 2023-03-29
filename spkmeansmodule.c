@@ -4,6 +4,7 @@
 #include "spkmeans.h"
 
 
+
 int free_memory(double* a, double* b, double* c, double** new_cluster, double** cluster_mean, double** data) {   
     if(a) {
         free(a);
@@ -15,13 +16,13 @@ int free_memory(double* a, double* b, double* c, double** new_cluster, double** 
         free(c);
     }
     if(new_cluster) {
-        free(new_cluster);
+        free_matrix(new_cluster);
     }
     if(cluster_mean) {
-        free(cluster_mean);
+        free_matrix(cluster_mean);
     }
     if(data) {
-        free(data);
+        free_matrix(data);
     }
     return 0;
 }
@@ -366,8 +367,7 @@ static PyMethodDef methods[] = {
     {"gl",(PyCFunction)gl,METH_VARARGS,PyDoc_STR("takes points list(2D), returns the graph laplacian matrix")},
     {"jacobi",(PyCFunction)jacobi,METH_VARARGS,PyDoc_STR("jacobis on a symmetric matrix,second argument should be \"sorted\" for spk purposes\n, returns(values,vectors matrix,k)")},
       /*  The docstring for the function */
-    {NULL, NULL, 0, NULL}     
-    //dont we need here also the kmeans? 
+    {NULL, NULL, 0, NULL}      
 };
 
 static struct PyModuleDef mykmeanssp = {

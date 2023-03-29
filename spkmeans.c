@@ -4,6 +4,9 @@
 int main(){
     return 0;
 }
+
+
+
 double** allocateNonSquareMatrix(size_t rows, size_t cols) {   // i really dont remember writing this, dont think we need it 
 	double** matrix;
 	double* data;
@@ -63,6 +66,7 @@ double** ddg(double** adj_matrix, int n) {
         }
         degree_matrix[i][i] = degree;
     }
+    free_matrix(adj_matrix, n);
     return degree_matrix;
 }
 
@@ -75,6 +79,8 @@ double** gl(double** D, double** W, int n) {     // free this also
             laplacian_matrix[i][j] = D[i][j] - W[i][j];
         }
     }
+    free_matrix(D, n);
+    free_matrix(W, n);
     return laplacian_matrix;
 }
 
@@ -131,6 +137,7 @@ double** create_p(double** A, int n){   // create the rotation matrix, we need t
     p[pivot[0]][pivot[1]] = c_s[1];
     p[pivot[1]][pivot[0]] = -c_s[1];
     p[pivot[1]][pivot[1]] = c_s[0];
+    free(pivot);
     return p;   
 }
 
@@ -313,5 +320,7 @@ double** jacobi(double** L, int n){
     }
     free(rotation);
     free(eigenVectors);
+    free_matrix(prev_L, n);
+
     return eigenVecVal;
 }
