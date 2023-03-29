@@ -180,7 +180,7 @@ static PyObject* wam(PyObject* self, PyObject* args) {
     size_t no_dims = PyObject_Length(point);
     size_t i,j;
 
-    double** points_lst = allocateNonSquareMatrix(no_points, no_dims);
+    double** points_lst = allocateMatrix(no_points, no_dims);
     if(!points_lst) {
         PyErr_SetString(PyExc_MemoryError, "Could not allocate memory");
         return NULL;
@@ -222,7 +222,7 @@ static PyObject* ddg(PyObject* self, PyObject* args) {
     size_t no_dims = PyObject_Length(point);
     size_t i,j;
 
-    double** points_lst = allocateNonSquareMatrix(no_points, no_dims);
+    double** points_lst = allocateMatrix(no_points, no_dims);
     if(!points_lst) {
         PyErr_SetString(PyExc_MemoryError, "Could not allocate memory");
         return NULL;
@@ -255,6 +255,7 @@ static PyObject* ddg(PyObject* self, PyObject* args) {
     }
     free_matrix(points_lst, no_points);
     free_matrix(ddg_matrix, no_points);
+    free_matrix(wam_matrix, no_points);
     return result;
 }
 
@@ -269,7 +270,7 @@ static PyObject* gl(PyObject* self, PyObject* args) {
     size_t no_dims = PyObject_Length(point);
     size_t i,j;
 
-    double** points_lst = allocateNonSquareMatrix(no_points, no_dims);
+    double** points_lst = allocateMatrix(no_points, no_dims);
     if(!points_lst) {
         PyErr_SetString(PyExc_MemoryError, "Could not allocate memory");
         return NULL;
@@ -294,7 +295,7 @@ static PyObject* gl(PyObject* self, PyObject* args) {
         free_matrix(wam_matrix, no_points);
         return NULL;
     }
-    double** gl_matrix = gl(ddg_matrix, wam_matrix, no_dims);
+    double** gl_matrix = gl(ddg_matrix, wam_matrix, no_dims);  // we free the wam and ddg matrix in gl
     if(!gl_matrix) {
         PyErr_SetString(PyExc_MemoryError, "Could not allocate memory");
         free_matrix(points_lst, no_points);
@@ -310,9 +311,7 @@ static PyObject* gl(PyObject* self, PyObject* args) {
             PyList_SetItem(row, j, PyFloat_FromDouble(gl_matrix[i][j]));
         }
     }
-    free_matrix(points_lst, no_points)
-    free_matrix(wam_matrix, no_points);
-    free_matrix(ddg_matrix, no_points);
+    free_matrix(points_lst, no_points);
     free_matrix(gl_matrix, no_points);
     return result;
 }
@@ -328,7 +327,7 @@ static PyObject* jacobi(PyObject* self, PyObject* args){
     size_t no_dims = PyObject_Length(point);
     size_t i,j;
 
-    double** points_lst = allocateNonSquareMatrix(no_points, no_dims);  // this will be square dont know if this is a problem
+    double** points_lst = allocateMatrix(no_points, no_dims);  
     if(!points_lst) {
         PyErr_SetString(PyExc_MemoryError, "Could not allocate memory");
         return NULL;
@@ -340,7 +339,7 @@ static PyObject* jacobi(PyObject* self, PyObject* args){
         }
     }
     
-    double** jacobi_matrix = jacobi(points_lst, no_dims); //maybe we do need to call wan ddg and lg not sure
+    double** jacobi_matrix = jacobi(points_lst, no_dims); 
     if(!jacobi_matrix) {
         PyErr_SetString(PyExc_MemoryError, "Could not allocate memory");
         free_matrix(points_lst, no_points);

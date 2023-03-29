@@ -5,7 +5,7 @@ CC = gcc
 CFLAGS = -Wall -g -Wextra -Werror -pedantic-errors
 LDFLAGS = -lm 
 # Source files
-SOURCES = spkmeans.c
+SOURCES = spkmeans.c main.c
 HEADERS = spkmeans.h
 
 # Object files

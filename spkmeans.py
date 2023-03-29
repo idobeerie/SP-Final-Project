@@ -63,7 +63,7 @@ if goal =='spk':
         start_centroids, start_indices = create_centroids(pd.DataFrame(U), k)
     starting_centroids = start_centroids.values.tolist()
 
-    kmeans_result = km.fit(U, starting_centroids)
+    kmeans_result = km.spk(U, starting_centroids)
 
     print(",".join(f'{x:.0f}' for x in start_indices))
 

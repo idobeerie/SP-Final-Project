@@ -1,8 +1,7 @@
 #include "spkmeans.h"
 
 
-    
-int main(int argc, char* argv){   
+int main(int argc, char** argv){   
     FILE* fp;
     int d, n;
     n = 0;
@@ -13,7 +12,7 @@ int main(int argc, char* argv){
     double** degree_matrix;
     double** jacobi_res;
     char sepereator;
-    char* goal = malloc(10 * sizeof(char));
+    char* goal;
     if(argc != 3){
         printf("not enough arguments, sory");
         return 1;
@@ -42,7 +41,7 @@ int main(int argc, char* argv){
     }
     for(int i = 0; i < n; i++){
         for(int j = 0; j < d; j++){
-            fscanf(fp, "%lf", &centroids[i][j]);
+            fscanf(fp, "%lf,", &centroids[i][j]);
         }
     }
     fclose(fp);
@@ -66,14 +65,14 @@ int main(int argc, char* argv){
         free_matrix(degree_matrix, n);
     }
     else if(strcmp("gl", goal) == 0){
-        laplacian = create_laplacian(adj_matrix, degree_matrix, n);
+        laplacian = gl(adj_matrix, degree_matrix, n);
         print_matrix(laplacian, n, n);
         free_matrix(laplacian, n);
     }
-    free_matrix(centroids, n);
     else{
         printf("invalid goal");
     }
+    free_matrix(centroids, n);
     return 1;  
 }
 

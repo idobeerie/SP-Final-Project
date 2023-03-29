@@ -1,10 +1,6 @@
 
 #include "spkmeans.h"
 
-int main(){
-    return 0;
-}
-
 
 
 double** allocateMatrix(size_t rows, size_t cols) {   // i really dont remember writing this, dont think we need it 
