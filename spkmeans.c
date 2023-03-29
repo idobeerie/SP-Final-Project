@@ -71,7 +71,7 @@ double** gl(double** D, double** W, int n) {
     for (int i = 0; i < n; i++) {
         laplacian_matrix[i] = malloc(n * sizeof(double));
         for (int j = 0; j < n; j++) {
-            laplacian_matrix[i][j] = D[i][j] - W[i][j];
+            laplacian_matrix[i][j] = (D[i][j] - W[i][j]) * (-1);
         }
     }
     free_matrix(D);
@@ -162,9 +162,10 @@ double** transpose(double** A, int n){   // transpose a matrix, free this also
 }
 
 void matrix_multiply(double** A, double** B, int n){   // multiply two matrices
-    double** C = malloc(n * sizeof(double*));
+    double** C = allocateMatrix(n, n);
+
+
     for (int i = 0; i < n; i++) {
-        C[i] =  malloc(n * sizeof(double));
         for (int j = 0; j < n; j++) {
             C[i][j] = 0;
             for (int k = 0; k < n; k++) {
@@ -172,6 +173,7 @@ void matrix_multiply(double** A, double** B, int n){   // multiply two matrices
             }
         }
     }
+
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < n; j++) {
             A[i][j] = C[i][j];
@@ -296,7 +298,7 @@ double** jacobi(double** L, int n){
         current_off = off(L, n);
         prev_L = L;
     }
-
+    print_matrix(L, n, n);
     for(rows = 0; rows < n + 1; rows++){
         eigenVecVal[rows] = (double*)malloc(n * sizeof(double));
         for(cols = 0; cols < n; cols++){
@@ -315,6 +317,5 @@ double** jacobi(double** L, int n){
     free(rotation);
     free(eigenVectors);
     free_matrix(prev_L);
-
     return eigenVecVal;
 }

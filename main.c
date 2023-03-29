@@ -51,8 +51,6 @@ int main(int argc, char** argv){
         jacobi_res = jacobi(centroids, n);
         print_matrix(jacobi_res, n+1, n);
         free_matrix(jacobi_res);
-        free_matrix(centroids);
-        return 1;
     }
     adj_matrix = wam(centroids, n, d);
     degree_matrix = ddg(adj_matrix, n);
