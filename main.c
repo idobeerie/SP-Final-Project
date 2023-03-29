@@ -2,7 +2,7 @@
 
 
     
-int main(int argc, char* argv){   // this will be in spkmeans.c
+int main(int argc, char* argv){   
     FILE* fp;
     int d, n;
     n = 0;
@@ -46,17 +46,20 @@ int main(int argc, char* argv){   // this will be in spkmeans.c
         }
     }
     fclose(fp);
+
     if(strcmp("jacobi", goal) == 0){
         jacobi_res = jacobi(centroids, n);
         print_matrix(jacobi_res, n+1, n);
         free_matrix(jacobi_res, n+1);
+        free_matrix(centroids, n);
+        return 1;
     }
     adj_matrix = wam(centroids, n, d);
-    else if(strcmp("wam", goal) == 0){
-        print_matrix(adj_matrix, n, n);
-        free_matrix(adj_matrix, n); 
-    }
     degree_matrix = ddg(adj_matrix, n);
+    if(strcmp("wam", goal) == 0){
+        print_matrix(adj_matrix, n, n);
+        free_matrix(adj_matrix, n);
+    }
     else if(strcmp("ddg", goal) == 0){
         print_matrix(degree_matrix, n, n);
         free_matrix(adj_matrix, n);
@@ -66,8 +69,6 @@ int main(int argc, char* argv){   // this will be in spkmeans.c
         laplacian = create_laplacian(adj_matrix, degree_matrix, n);
         print_matrix(laplacian, n, n);
         free_matrix(laplacian, n);
-        free_matrix(adj_matrix, n);
-        free_matrix(degree_matrix, n);
     }
     free_matrix(centroids, n);
     else{

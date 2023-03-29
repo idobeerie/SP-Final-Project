@@ -7,7 +7,7 @@ int main(){
 
 
 
-double** allocateNonSquareMatrix(size_t rows, size_t cols) {   // i really dont remember writing this, dont think we need it 
+double** allocateMatrix(size_t rows, size_t cols) {   // i really dont remember writing this, dont think we need it 
 	double** matrix;
 	double* data;
 	size_t i;
@@ -24,11 +24,10 @@ double** allocateNonSquareMatrix(size_t rows, size_t cols) {   // i really dont 
 	return matrix;
 }
 
-double** wam(double** centroids, int n, int d) {   // we need to remmeber to free this and also create X to be the centroids as a matrix
-    double** adj_matrix = malloc(n * sizeof(double*));  
+double** wam(double** centroids, int n, int d) {   
+    double** adj_matrix = allocateMatrix(n, n);  
     double diff; 
     for (int i = 0; i < n; i++) {
-        adj_matrix[i] = malloc(n * sizeof(double));
         for (int j = 0; j < n; j++) {
             if (i == j) {
                 adj_matrix[i][j] = 0;
@@ -54,11 +53,11 @@ void set_matrix_to_zero(double** matrix, int n) {    //helper function
 }
 
 double** ddg(double** adj_matrix, int n) {    
-    double** degree_matrix = malloc(n * sizeof(double*));
+    double** degree_matrix = allocateMatrix(n, n);
+    double degree = 0;
     set_matrix_to_zero(degree_matrix, n);  
     for (int i = 0; i < n; i++) {
-        degree_matrix[i] = malloc(n * sizeof(double));
-        double degree = 0;
+        degree = 0;
         for (int j = 0; j < n; j++) {
             if (adj_matrix[i][j] >0){
                 degree += 1;
@@ -66,13 +65,12 @@ double** ddg(double** adj_matrix, int n) {
         }
         degree_matrix[i][i] = degree;
     }
-    free_matrix(adj_matrix, n);
     return degree_matrix;
 }
 
 
-double** gl(double** D, double** W, int n) {     // free this also
-    double** laplacian_matrix = malloc(n * sizeof(double*));
+double** gl(double** D, double** W, int n) {     
+    double** laplacian_matrix = allocateMatrix(n, n);
     for (int i = 0; i < n; i++) {
         laplacian_matrix[i] = malloc(n * sizeof(double));
         for (int j = 0; j < n; j++) {
@@ -85,7 +83,7 @@ double** gl(double** D, double** W, int n) {     // free this also
 }
 
 
-int* find_pivot(double** matrix, int n) {    // free this
+int* find_pivot(double** matrix, int n) {    
     double max_abs = 0.0;
     int* pivot = malloc(2 * sizeof(int));   
     int max_i = 0, max_j = 0;
