@@ -42,9 +42,10 @@ double** wam(double** centroids, int n, int d) {
     return adj_matrix;
 }
 
-void set_matrix_to_zero(double** matrix, int n, int d) {    //helper function
+void set_matrix_to_zero(double** matrix, int n, int m, int d) {    //helper function
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < d; j++) {
+        for (int j = 0; j < m; j++) {
             matrix[i][j] = 0;
         }
     }
@@ -54,6 +55,7 @@ double** ddg(double** adj_matrix, int n) {
     double** degree_matrix = allocateMatrix(n, n);
     double degree = 0;
     // print_matrix(adj_matrix, n, n);
+    // set_matrix_to_zero(degree_matrix, n, n);  
     for (int i = 0; i < n; i++) {
         degree = 0;
         for (int j = 0; j < n; j++) {
