@@ -11,7 +11,7 @@ double** allocateMatrix(size_t rows, size_t cols);   // i really dont remember w
 	
 double** wam(double** centroids, int n, int d);
 
-void set_matrix_to_zero(double** matrix, int n) ;
+void set_matrix_to_zero(double** matrix, int n, int d) ;
 
 double** ddg(double** adj_matrix, int n) ;
 

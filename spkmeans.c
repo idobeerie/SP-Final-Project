@@ -18,7 +18,7 @@ double** allocateMatrix(size_t rows, size_t cols) {   // i really dont remember 
             matrix[i] = data+i*cols;
         }
     }
-    set_matrix_to_zero(matrix, rows);
+    set_matrix_to_zero(matrix, rows, cols);
 	return matrix;
 }
 
@@ -42,9 +42,9 @@ double** wam(double** centroids, int n, int d) {
     return adj_matrix;
 }
 
-void set_matrix_to_zero(double** matrix, int n) {    //helper function
+void set_matrix_to_zero(double** matrix, int n, int d) {    //helper function
     for (int i = 0; i < n; i++) {
-        for (int j = 0; j < n; j++) {
+        for (int j = 0; j < d; j++) {
             matrix[i][j] = 0;
         }
     }
@@ -54,7 +54,6 @@ double** ddg(double** adj_matrix, int n) {
     double** degree_matrix = allocateMatrix(n, n);
     double degree = 0;
     // print_matrix(adj_matrix, n, n);
-    set_matrix_to_zero(degree_matrix, n);  
     for (int i = 0; i < n; i++) {
         degree = 0;
         for (int j = 0; j < n; j++) {
@@ -166,7 +165,6 @@ void matrix_multiply(double** A, double** B, int n){   // multiply two matrices
     double** C = allocateMatrix(n, n);
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < n; j++) {
-            C[i][j] = 0.0;
             for (int k = 0; k < n; k++) {
                 C[i][j] += A[i][k] * B[k][j];
             }
@@ -181,6 +179,7 @@ void matrix_multiply(double** A, double** B, int n){   // multiply two matrices
 
     // Finally, free C and return A
     free_matrix(C);
+    //free_matrix(B);   //ask ido because i am scared
     return;
 }
 
@@ -266,20 +265,20 @@ void copy_matrix(double** mat, double** copy, int n, int m) {
 }
 double** jacobi(double** L, int n){
     int iter = 0, i=0, j=0, rows=0, cols=0;
+    int* pivot = malloc(2 * sizeof(int));
     double c, s;
     double current_off, prev_off = 0.0, epsi = 1.0*0.00001;  //global maybe?
-    print_matrix(L, n, n);
     current_off = off(L, n);
-    printf("%f", current_off);
     double** prev_L = allocateMatrix(n, n);
     copy_matrix(L, prev_L, n, n);
     double** rotation;
     double** eigenVectors = allocateMatrix(n,n);// just the vectors
     double** eigenVecVal = allocateMatrix(n+1, n); // the first row will be the eigen values
-    while(iter < 100 && prev_off - current_off < epsi){
-        j = find_pivot(L, n)[1];
-        i = find_pivot(L, n)[0];
-        rotation = create_p(L, n);
+    while(iter < 100 && (prev_off - current_off > epsi || iter == 0)){
+        pivot = find_pivot(L, n);
+        j = pivot[0];
+        i = pivot[1];
+        rotation = create_p(L, n);    //we can send i and j and not call find_pivot again
         if(iter == 0){
             copy_matrix(rotation, eigenVectors, n, n);
         }
@@ -288,7 +287,7 @@ double** jacobi(double** L, int n){
         }
         c = rotation[i][i];
         s = rotation[i][j];
-        for(int k=0; k<n;k++){
+        for(int k=0; k<n-1;k++){     // why is this n-1??
             L[i][k] = c*prev_L[i][k] - s*prev_L[j][k];
             L[j][k] = s*prev_L[i][k] + c*prev_L[j][k];
             L[k][i] = c*prev_L[k][i] - s*prev_L[k][j];
@@ -302,6 +301,7 @@ double** jacobi(double** L, int n){
         prev_off = current_off;
         current_off = off(L, n);
         copy_matrix(L, prev_L, n, n);
+        free(rotation);
     }
     for(rows = 0; rows < n + 1; rows++){
         for(cols = 0; cols < n; cols++){
@@ -309,16 +309,12 @@ double** jacobi(double** L, int n){
                 eigenVecVal[rows][cols] = L[cols][cols];
             }
             else{
-                eigenVecVal[rows][cols] = L[rows][cols];
+                eigenVecVal[rows][cols] = eigenVectors[rows-1][cols];
             }
         }
     }
-    for(rows = 0; rows < n; rows++){
-        free(rotation[rows]);
-        free(eigenVectors[rows]);
-    }
-    free(rotation);
     free(eigenVectors);
-    free_matrix(prev_L);
+    free(prev_L);
+    free(pivot);
     return eigenVecVal;
 }
