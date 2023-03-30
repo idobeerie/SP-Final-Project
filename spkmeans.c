@@ -1,7 +1,18 @@
 
 #include "spkmeans.h"
 
+/* structs: */
+typedef struct ROTATION_MATRIX{
+    double c;
+    double s;
+    int i;
+    int j;
+} rotation_mat;
 
+typedef struct Jacobi_output{
+    double *eigenValues;
+    double **V;
+} Jacobi_output;
 
 double** allocateMatrix(size_t rows, size_t cols) {   // i really dont remember writing this, dont think we need it 
     double *data; 
@@ -265,6 +276,65 @@ void copy_matrix(double** mat, double** copy, int n, int m) {
         }
     }
 }
+
+// rotation_mat *calc_rotation_mat(rotation_mat *P, double **A, int n) {
+//     /* returns a struct that represent the rotation matrix of A. */
+//     int sign_theta, i, j;
+//     double Aii, Ajj, Aij, theta, t, max_val = 0, abs_curr;
+
+// /* TODO, tests it
+//     int *ij = find_off_diag_max_abs_val(A, n);
+//     P->i = ij[0];
+//     P->j = ij[1];
+// */
+// /*if all of-diagonal elements are zeros: */
+//     P->i = 0;
+//     P->j = 1;
+
+//     for (i = 0; i < n; i++) {
+//         for (j = i + 1; j < n; j++) {
+//             abs_curr = fabs(A[i][j]);
+//             if (abs_curr > max_val) {
+//                 P->i = i;
+//                 P->j = j;
+//                 max_val = abs_curr;
+//             }
+//         }
+//     }
+
+//     Aii = A[P->i][P->i];
+//     Ajj = A[P->j][P->j];
+//     Aij = A[P->i][P->j];
+
+//     theta = (Ajj - Aii) / (2 * Aij);
+//     sign_theta = (theta == 0) ? 1 : (int) (theta / fabs(theta));
+//     t = sign_theta / (fabs(theta) + sqrt((theta * theta) + 1));
+
+//     P->c = 1 / (sqrt(t * t + 1));
+//     P->s = t * (P->c);
+// /* todo
+//     free(ij);
+// */
+//     return P;
+// }
+
+/*
+    Jacobi_output *jacobi(double **A, int n) {
+    double **A_tag, **V, **temp;
+    double *eigenValues;
+    Jacobi_output *output_struct;
+    rotation_mat *P;
+    int i = 1;
+    A_tag = allocateMatrix(n, n);
+    copy_matrix(A, A_tag, n, n);
+    V = allocateMatrix(n, n);   //this needs to be the identity matrix
+    eigenValues = malloc(n * sizeof(double));
+    
+*/
+
+
+
+
 double** jacobi(double** L, int n){
     int iter = 0, i=0, j=0, rows=0, cols=0;
     int* pivot = malloc(2 * sizeof(int));
