@@ -4,19 +4,21 @@
 
 
 double** allocateMatrix(size_t rows, size_t cols) {   // i really dont remember writing this, dont think we need it 
-	double** matrix;
-	double* data;
-	size_t i;
-	if (!(matrix = malloc(sizeof(double*) * rows))) {
-		return NULL;
-	}
-	if (!(data = calloc(rows*cols, sizeof(double)))) {
-		free(matrix);
-		return NULL;
-	}
-	for (i = 0; i < rows; i++) {
-		matrix[i] = data + i * cols;
-	}
+    double *data; 
+    double **matrix;
+    size_t i, j;
+    data = calloc(rows*cols, sizeof(double));
+    matrix = calloc(rows,sizeof(double *));
+    if(data == NULL || matrix == NULL){
+        free(data);
+        free(matrix);
+    }
+    for( i=0 ; i<rows ; i++ ){
+        for( j = 0; j < cols; j++){
+            matrix[i] = data+i*cols;
+        }
+    }
+    set_matrix_to_zero(matrix, rows);
 	return matrix;
 }
 
@@ -69,7 +71,6 @@ double** ddg(double** adj_matrix, int n) {
 double** gl(double** D, double** W, int n) {     
     double** laplacian_matrix = allocateMatrix(n, n);
     for (int i = 0; i < n; i++) {
-        laplacian_matrix[i] = malloc(n * sizeof(double));
         for (int j = 0; j < n; j++) {
             laplacian_matrix[i][j] = (D[i][j] - W[i][j]) * (-1);
         }
@@ -115,9 +116,8 @@ double* calculate_c_s(double ii, double jj, double ij) {   // free this
 }
 
 double** create_p(double** A, int n){   // create the rotation matrix, we need to see how we want to use it and free it, maybe we want to put this in the main function
-    double** p = malloc(n * sizeof(double*));
-    for (int i = 0; i < n; i++) {
-        p[i] = (double*) malloc(n * sizeof(double));
+    double** p = allocateMatrix(n, n);
+    for(int i = 0; i < n; i++){
         for (int j = 0; j < n; j++) {
             if (i == j) {
                 p[i][j] = 1;
@@ -126,6 +126,7 @@ double** create_p(double** A, int n){   // create the rotation matrix, we need t
             }
         }
     }
+    
     int* pivot = find_pivot(A, n);
     double* c_s = calculate_c_s(A[pivot[0]][pivot[0]], A[pivot[1]][pivot[1]], A[pivot[0]][pivot[1]]);
     p[pivot[0]][pivot[0]] = c_s[0];
@@ -143,7 +144,7 @@ double off(double** A, int n){   // calculate the off diagonal sum of the matrix
     for(int i = 0; i < n; i++){
         for(int j = 0; j < n; j++){
             if(i != j){
-                sum += A[i][j] * A[i][j];
+                sum = sum + (A[i][j] * A[i][j]);
             }
         }
     }
@@ -163,11 +164,9 @@ double** transpose(double** A, int n){   // transpose a matrix, free this also
 
 void matrix_multiply(double** A, double** B, int n){   // multiply two matrices
     double** C = allocateMatrix(n, n);
-
-
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < n; j++) {
-            C[i][j] = 0;
+            C[i][j] = 0.0;
             for (int k = 0; k < n; k++) {
                 C[i][j] += A[i][k] * B[k][j];
             }
@@ -181,10 +180,7 @@ void matrix_multiply(double** A, double** B, int n){   // multiply two matrices
     }
 
     // Finally, free C and return A
-    for (int i = 0; i < n; i++) {
-        free(C[i]);
-    }
-    free(C);
+    free_matrix(C);
     return;
 }
 
@@ -261,26 +257,35 @@ void print_matrix(double** mat, int n, int m) {
 void free_matrix(double** mat) {
     free(mat);
 }
-
+void copy_matrix(double** mat, double** copy, int n, int m) {
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < m; j++) {
+            copy[i][j] = mat[i][j];
+        }
+    }
+}
 double** jacobi(double** L, int n){
-    int iter = 0, i, j, rows, cols;
+    int iter = 0, i=0, j=0, rows=0, cols=0;
     double c, s;
     double current_off, prev_off = 0.0, epsi = 1.0*0.00001;  //global maybe?
+    print_matrix(L, n, n);
     current_off = off(L, n);
-    double** prev_L = L;
+    printf("%f", current_off);
+    double** prev_L = allocateMatrix(n, n);
+    copy_matrix(L, prev_L, n, n);
     double** rotation;
-    double** eigenVectors = malloc(n * sizeof(double*)); // just the vectors
-    double** eigenVecVal = malloc((n+1) * sizeof(double*)); // the first row will be the eigen values
-    while(iter < 100 || prev_off - current_off > epsi){
+    double** eigenVectors = allocateMatrix(n,n);// just the vectors
+    double** eigenVecVal = allocateMatrix(n+1, n); // the first row will be the eigen values
+    while(iter < 100 && prev_off - current_off < epsi){
         j = find_pivot(L, n)[1];
         i = find_pivot(L, n)[0];
         rotation = create_p(L, n);
         if(iter == 0){
-            eigenVectors = rotation;
+            copy_matrix(rotation, eigenVectors, n, n);
         }
         else{
             matrix_multiply(eigenVectors, rotation, n);
-            }
+        }
         c = rotation[i][i];
         s = rotation[i][j];
         for(int k=0; k<n;k++){
@@ -292,15 +297,13 @@ double** jacobi(double** L, int n){
         L[i][i] = c*c*prev_L[i][i] - 2*c*s*prev_L[i][j] + s*s*prev_L[j][j];
         L[j][j] = s*s*prev_L[i][i] + 2*c*s*prev_L[i][j] + c*c*prev_L[j][j];
         L[i][j] = (c*c-s*s)*L[i][j] + c*s*(prev_L[i][i] - prev_L[j][j]);
-        L[j][i] = L[i][j];
+        L[j][i] = prev_L[i][j];
         iter++;
         prev_off = current_off;
         current_off = off(L, n);
-        prev_L = L;
+        copy_matrix(L, prev_L, n, n);
     }
-    print_matrix(L, n, n);
     for(rows = 0; rows < n + 1; rows++){
-        eigenVecVal[rows] = (double*)malloc(n * sizeof(double));
         for(cols = 0; cols < n; cols++){
             if(rows == 0){
                 eigenVecVal[rows][cols] = L[cols][cols];
