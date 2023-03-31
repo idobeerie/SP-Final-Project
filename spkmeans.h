@@ -7,12 +7,27 @@
 #include <string.h>
 
 
+/* structs: */
+typedef struct ROTATION_MATRIX{
+    double c;
+    double s;
+    int i;
+    int j;
+} rotation_mat;
+
+typedef struct Jacobi_output{
+    double *eigenValues;
+    double **V;
+} Jacobi_output;
+
+
+
 double** allocateMatrix(size_t rows, size_t cols);   // i really dont remember writing this, dont think we need it 
 	
 double** wam(double** centroids, int n, int d);
 
-void set_matrix_to_zero(double** matrix, int n, int d) ;
 void set_matrix_to_zero(double** matrix, int n, int m);
+void print_list(double *, int);
 
 double** ddg(double** adj_matrix, int n);
 
@@ -34,6 +49,6 @@ void print_matrix(double** mat, int n, int m);
 
 void free_matrix(double** mat);
 
-double** jacobi(double** L, int n);
+Jacobi_output* jacobi(double** L, int n);
 
 #endif

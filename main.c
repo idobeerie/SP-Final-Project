@@ -10,7 +10,7 @@ int main(int argc, char** argv){
     double** centroids;
     double** adj_matrix;
     double** degree_matrix;
-    double** jacobi_res;
+    Jacobi_output* jacobi_res;
     char sepereator;
     char* goal;
     if(argc != 3){
@@ -49,8 +49,11 @@ int main(int argc, char** argv){
 
     if(strcmp("jacobi", goal) == 0){
         jacobi_res = jacobi(centroids, n);
-        print_matrix(jacobi_res, n+1, n);
-        free_matrix(jacobi_res);
+        print_list(jacobi_res->eigenValues, n);
+        print_matrix(jacobi_res->V, n, n);
+        free_matrix(jacobi_res->V);
+        free(jacobi_res->eigenValues);
+        free(jacobi_res);
     }
     adj_matrix = wam(centroids, n, d);
     degree_matrix = ddg(adj_matrix, n);
@@ -68,7 +71,7 @@ int main(int argc, char** argv){
         print_matrix(laplacian, n, n);
         free_matrix(laplacian);
     }
-    else{
+    else if(strcmp("jacobi", goal) == 1){
         printf("invalid goal");
     }
     free_matrix(centroids);
