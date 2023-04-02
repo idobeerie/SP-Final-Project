@@ -1,9 +1,4 @@
-#define PY_SSIZE_T_CLEAN
-#include <Python.h>
-#include <assert.h>
-#include <stdio.h>
-#include <string.h>
-#include "spkmeans.h"
+#include "spkmeansmodule.h"
 
 #define MAX_KMEANS_ITERS 300
 
@@ -18,22 +13,16 @@ static double** create2DArrayFromPyObject(PyObject *data, int n, int d) {
     double** points;
     PyObject *temp_point,*inner_item;
 
-    points = (double **) malloc(n * sizeof(double *));
+    points = alloc_nXm_matrix(n,d);
     verifyNotNULL(points)
 
     for (i = 0; i < n; i++) {
-        double *vector = malloc(d * sizeof(double));
-        verifyNotNULL(vector)
-
-
         temp_point = PyList_GetItem(data, i);
         for (j = 0; j < d; j++) {
             inner_item = PyList_GetItem(temp_point, j);
-            vector[j] = PyFloat_AsDouble(inner_item);
+            points[i][j] = PyFloat_AsDouble(inner_item);
         }
-        points[i] = vector;
     }
-
     return points;
 }
 static PyObject *create2DPyObject(double** matrix, int n, int d) {
@@ -56,7 +45,6 @@ static PyObject *create2DPyObject(double** matrix, int n, int d) {
 
 /*--------------------------------- c-api -----------------------------------------------------*/
 static PyObject *wam_api(PyObject *self, PyObject *args) {
-    printf("Ido");
     PyObject *points;
     int n, d ;
     double **data_points;
@@ -67,6 +55,7 @@ static PyObject *wam_api(PyObject *self, PyObject *args) {
     data_points = create2DArrayFromPyObject(points, n, d);
     double **wam_matrix = wam(data_points, n, d);
     PyObject *result = create2DPyObject(wam_matrix, n, n);
+    print_matrix(wam_matrix, n, n);
     free_matrix(data_points, n);
     free_matrix(wam_matrix, n);
     return result;
@@ -83,6 +72,7 @@ static PyObject *ddg_api(PyObject *self, PyObject *args) {
     double **wam_matrix = wam(data_points, n, d);
     double **ddg_matrix = ddg(wam_matrix, n);
     PyObject *result = create2DPyObject(ddg_matrix, n, n);
+    print_matrix(ddg_matrix, n, n);
     free_matrix(data_points, n);
     free_matrix(wam_matrix, n);
     free_matrix(ddg_matrix, n);
@@ -101,6 +91,7 @@ static PyObject *gl_api(PyObject *self, PyObject *args) {
     double **ddg_matrix = ddg(wam_matrix, n);
     double **gl_matrix = gl(ddg_matrix, wam_matrix, n);
     PyObject *result = create2DPyObject(gl_matrix, n, n);
+    print_matrix(gl_matrix, n, n);
     free_matrix(data_points, n);
     free_matrix(wam_matrix, n);
     free_matrix(ddg_matrix, n);
@@ -119,6 +110,7 @@ static PyObject *jacobi_api(PyObject *self, PyObject *args) {
     data_points = create2DArrayFromPyObject(points, n, d);
     Jacobi_output *jacobi_matrix = jacobi(data_points, n);
     double **jacobi_res = create2DfromJacobi(jacobi_matrix, n);
+    print_matrix(jacobi_res, n, n);
     PyObject *result = create2DPyObject(jacobi_res, n, n);
     free_matrix(data_points, n);
     free_matrix(jacobi_res, n);
@@ -140,7 +132,7 @@ static PyObject *kmeans_pp_api(PyObject *self, PyObject *args) {
 
     double **finalCentroids = kmeans(points, initialCentroids, k, d, n, MAX_KMEANS_ITERS);
 
-    print_2d_array(finalCentroids, k, d);
+    print_matrix(finalCentroids, k, d);
     PyObject *result = create2DPyObject(finalCentroids, k, d);
     free_matrix(points, n);
     free_matrix(initialCentroids, k);

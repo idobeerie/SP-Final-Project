@@ -127,7 +127,6 @@ if __name__ == '__main__':
         
     if goal in["gl", "ddg", "wam"]:
         df = pd.read_csv(filename, header=None, dtype=float)
-        print("asdfasdfads")
         X = df.values.tolist()
         if "goal" == "gl":
             mat = km.gl(df.shape[0], df.shape[1], X)

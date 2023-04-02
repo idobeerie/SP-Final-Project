@@ -20,6 +20,7 @@ typedef struct Jacobi_output{
     double **V;
 } Jacobi_output;
 
+double** alloc_nXm_matrix(int n, int m);
 double** create2DfromJacobi(Jacobi_output* jacobi_output, int n);
 double** create_identity_matrix(int n);
 double** allocateMatrix(size_t rows, size_t cols);   // i really dont remember writing this, dont think we need it 

@@ -302,10 +302,7 @@ double **create_identity_matrix(int n)
 
 void free_matrix(double **mat, int n)
 {
-    for (int i = 0; i < n; i++)
-    {
-        free(mat[i]);
-    }
+    free(mat[0]);
     free(mat);
 }
 
