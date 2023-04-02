@@ -1,3 +1,4 @@
+#define PY_SSIZE_T_CLEAN
 #include <Python.h>
 #include <assert.h>
 #include <stdio.h>
@@ -8,12 +9,54 @@
 
 
 /* C Api Declarations: */
-static double **create2DArrayFromPyObject(PyObject *data, int n, int d);
-static PyObject *create2DPyObject(double **data, int n, int d);
+static double** create2DArrayFromPyObject(PyObject *data, int n, int d);
+static PyObject* create2DPyObject(double **data, int n, int d);
 #define verifyNotNULL(var) if((var)==NULL) {printf("An Error Has Occured"); exit(-1);}
+
+static double** create2DArrayFromPyObject(PyObject *data, int n, int d) {
+    int i, j;
+    double** points;
+    PyObject *temp_point,*inner_item;
+
+    points = (double **) malloc(n * sizeof(double *));
+    verifyNotNULL(points)
+
+    for (i = 0; i < n; i++) {
+        double *vector = malloc(d * sizeof(double));
+        verifyNotNULL(vector)
+
+
+        temp_point = PyList_GetItem(data, i);
+        for (j = 0; j < d; j++) {
+            inner_item = PyList_GetItem(temp_point, j);
+            vector[j] = PyFloat_AsDouble(inner_item);
+        }
+        points[i] = vector;
+    }
+
+    return points;
+}
+static PyObject *create2DPyObject(double** matrix, int n, int d) {
+    int i,j;
+    PyObject *currentVector, *pyMatrix,*num;
+    pyMatrix = PyList_New(n);
+    verifyNotNULL(pyMatrix)
+    for (i = 0; i < n; i++) {
+        currentVector = PyList_New(d);
+        verifyNotNULL(currentVector)
+        for (j = 0; j < d; j++) {
+            num = PyFloat_FromDouble(matrix[i][j]);
+            verifyNotNULL(num)
+            PyList_SET_ITEM(currentVector, j, num);
+        }
+    PyList_SET_ITEM(pyMatrix, i, currentVector);
+    }
+    return pyMatrix;
+}
 
 /*--------------------------------- c-api -----------------------------------------------------*/
 static PyObject *wam_api(PyObject *self, PyObject *args) {
+    printf("Ido");
     PyObject *points;
     int n, d ;
     double **data_points;
@@ -24,7 +67,6 @@ static PyObject *wam_api(PyObject *self, PyObject *args) {
     data_points = create2DArrayFromPyObject(points, n, d);
     double **wam_matrix = wam(data_points, n, d);
     PyObject *result = create2DPyObject(wam_matrix, n, n);
-    print_matrix(wam_matrix, n, n);
     free_matrix(data_points, n);
     free_matrix(wam_matrix, n);
     return result;
@@ -75,13 +117,13 @@ static PyObject *jacobi_api(PyObject *self, PyObject *args) {
         Py_RETURN_NONE;
     }
     data_points = create2DArrayFromPyObject(points, n, d);
-    Jacobi_output *jacobi_matrix = jacobi(data_points, n, d);
+    Jacobi_output *jacobi_matrix = jacobi(data_points, n);
     double **jacobi_res = create2DfromJacobi(jacobi_matrix, n);
     PyObject *result = create2DPyObject(jacobi_res, n, n);
     free_matrix(data_points, n);
     free_matrix(jacobi_res, n);
-    free(jacobi_matrix->eigenvalues);
-    free_matrix(jacobi_matrix->eigenvectors, n);
+    free(jacobi_matrix->eigenValues);
+    free_matrix(jacobi_matrix->V, n);
     free(jacobi_matrix);
     return result;
 }
@@ -103,46 +145,6 @@ static PyObject *kmeans_pp_api(PyObject *self, PyObject *args) {
     free_matrix(points, n);
     free_matrix(initialCentroids, k);
     return result;
-}
-static double **create2DArrayFromPyObject(PyObject *data, int n, int d) {
-    int i, j;
-    double **points;
-    PyObject *temp_point,*inner_item;
-
-    points = (double **) malloc(n * sizeof(double *));
-    verifyNotNULL(points)
-
-    for (i = 0; i < n; i++) {
-        double *vector = malloc(d * sizeof(double));
-        verifyNotNULL(vector)
-
-
-        temp_point = PyList_GetItem(data, i);
-        for (j = 0; j < d; j++) {
-            inner_item = PyList_GetItem(temp_point, j);
-            vector[j] = PyFloat_AsDouble(inner_item);
-        }
-        points[i] = vector;
-    }
-
-    return points;
-}
-static PyObject *create2DPyObject(double** matrix, int n, int d) {
-    int i,j;
-    PyObject *currentVector, *pyMatrix,*num;
-    pyMatrix = PyList_New(n);
-    verifyNotNULL(pyMatrix)
-    for (i = 0; i < n; i++) {
-        currentVector = PyList_New(d);
-        verifyNotNULL(currentVector);
-        for (j = 0; j < d; j++) {
-            num = PyFloat_FromDouble(matrix[i][j]);
-            verifyNotNULL(num)
-            PyList_SET_ITEM(currentVector, j, num);
-        }
-    PyList_SET_ITEM(pyMatrix, i, currentVector);
-    }
-    return pyMatrix;
 }
 
 
