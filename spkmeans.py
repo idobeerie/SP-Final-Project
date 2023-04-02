@@ -4,7 +4,7 @@ import sys
 import math
 import os
 import random
-import kymeanssp as km
+import mykmeanssp as km
 
 
 def distance(arr1, arr2):
@@ -43,6 +43,8 @@ def kmeansPlusPlus(data, k, indexes):
 np.random.seed(0)
 eps = 0.0
 k = 0
+
+
 
 if len(sys.argv) < 3 or len(sys.argv) > 4:
     print("Error: missing arguments")
@@ -92,8 +94,9 @@ def create_centroids(data, k):   #the datais U
 if goal =='spk':
     df = pd.read_csv(filename, header=None, dtype=float)
     X = df.values.tolist()
-    L = mk.gl(X)
-    jacobi_vals = km.jacobi(L)
+    L = km.gl(df.shape[0], df.shape[1], X)
+    T = np.array(L)
+    jacobi_vals = km.jacobi(df.shape[0], df.shape[0], T)
     eigen_vals = jacobi_vals[0].copy()
     eigen_vals = np.array(eigen_vals)
     eigen_vals = np.sort(eigen_vals)
@@ -114,25 +117,27 @@ if goal =='spk':
 
     # print(",".join(f'{x:.0f}' for x in start_indices))
 
-    for cluster in kmeans_result:
-        # print(",".join(f'{x:.0f}' for x in cluster))
+    # for cluster in kmeans_result:
+    #     print(",".join(f'{x:.0f}' for x in cluster))
     
     if goal in["gl", "ddg", "wam"]:
         df = pd.read_csv(filename, header=None, dtype=float)
         X = df.values.tolist()
         if "goal" == "gl":
-            mat = km.gl(X)
+            mat = km.gl(df.shape[0], df.shape[1], X)
         elif goal == "ddg":
-            mat = km.ddg(X)
+            mat = km.ddg(df.shape[0], df.shape[1], X)
         elif goal == "wam":
-            mat = km.wam(X)
-        for row in mat:
-            # print(",".join(f'{x:.4f}' for x in row))
+            mat = km.wam(df.shape[0], df.shape[1], X)
+        # for row in mat:
+        #     print(",".join(f'{x:.4f}' for x in row))
 
 if goal == "jacobi":
     sym_df = pd.read_csv(filename, header=None, dtype=float)
     sym_mat = sym_df.values.tolist()
-    jacobi_vals, jacobi_vectors, k = km.jacobi(sym_mat, 0)
-    # print(",".join(f'{x:.4f}' for x in jacobi_vals))
+    jacobi_res = km.jacobi(sym_mat, 0)
+    jacobi_vals = jacobi_res[0]
+    jacobi_vectors = jacobi_res[1:]
+    print(",".join(f'{x:.4f}' for x in jacobi_vals))
     for row in jacobi_vectors:
-        # print(",".join(f'{x:.4f}' for x in row))
+        print(",".join(f'{x:.4f}' for x in row))
