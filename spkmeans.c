@@ -116,6 +116,21 @@ double **gl(double **D, double **W, int n)
     return laplacian_matrix;
 }
 
+double **gl_py(double **D, double **W, int n)
+{
+    double **laplacian_matrix = allocateMatrix(n, n);
+    for (int i = 0; i < n; i++)
+    {
+        for (int j = 0; j < n; j++)
+        {
+            laplacian_matrix[i][j] = (D[i][j] - W[i][j]);
+        }
+    }
+    free_contiguous_mat(D);
+    free_contiguous_mat(W);
+    return laplacian_matrix;
+}
+
 // int* find_pivot(double** matrix, int n) {
 //     double max_abs = 0.0;
 //     int* pivot = malloc(2 * sizeof(int));
@@ -300,8 +315,9 @@ double **create_identity_matrix(int n)
     return I;
 }
 
-void free_matrix(double **mat, int n)
+void free_matrix(double **mat)
 {
+
     free(mat[0]);
     free(mat);
 }

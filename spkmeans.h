@@ -49,7 +49,7 @@ double** transpose(double** A, int n);
 double** deepCopy2DArray(double **A, int row_num, int col_num);
 void print_matrix(double** mat, int n, int m);
 
-void free_matrix(double** mat, int n);
+void free_matrix(double** mat);
 
 Jacobi_output* jacobi(double** L, int n);
 

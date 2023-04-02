@@ -99,14 +99,22 @@ if __name__ == '__main__':
     if goal =='spk':
         df = pd.read_csv(filename, header=None, dtype=float)
         X = df.values.tolist()
-        L = km.gl(df.shape[0], df.shape[1], X)
-        T = np.array(L)
-        jacobi_vals = km.jacobi(df.shape[0], df.shape[0], T)
+        L = km.gl(df.shape[0], df.shape[1], X, 0)
+        print("1")
+        mat = []
+        for i in range(0, df.shape[0]):
+            mat.append([])
+            for j in range(0, df.shape[0]):
+                mat[i].append(L[i][j])
+        print("2")
+        jacobi_vals = km.jacobi(df.shape[0], df.shape[0], mat, 0)
+        print("3")
         eigen_vals = jacobi_vals[0].copy()
         eigen_vals = np.array(eigen_vals)
         eigen_vals = np.sort(eigen_vals)
+        print("4")
         if k == 0:
-            eigen_vals_cut = eigen_vals[:len(eigen_vals) /2]
+            eigen_vals_cut = eigen_vals[0:int((len(eigen_vals) / 2))]
             max_dif = sys.float_info.min
             for i in range(0,len(eigen_vals_cut)-1):
                 if float(eigen_vals_cut[i+1] - eigen_vals_cut[i]) > max_dif:
@@ -118,7 +126,7 @@ if __name__ == '__main__':
         U_lst = U.tolist()
         start_indices, start_centroids = create_centroids(U, k)
         start_centroids = start_centroids.tolist()
-        kmeans_result = km.spk(U_lst, start_centroids, 0.0)   
+        kmeans_result = km.spk(U_lst, start_centroids, 0.0, 1)  
 
         # print(",".join(f'{x:.0f}' for x in start_indices))
 
@@ -128,19 +136,20 @@ if __name__ == '__main__':
     if goal in["gl", "ddg", "wam"]:
         df = pd.read_csv(filename, header=None, dtype=float)
         X = df.values.tolist()
-        if "goal" == "gl":
-            mat = km.gl(df.shape[0], df.shape[1], X)
+
+        if goal == "gl":
+            mat = km.gl(df.shape[0], df.shape[1], X, 1)
         elif goal == "ddg":
-            mat = km.ddg(df.shape[0], df.shape[1], X)
+            mat = km.ddg(df.shape[0], df.shape[1], X, 1)
         elif goal == "wam":
-            mat = km.wam(df.shape[0], df.shape[1], X)
+            mat = km.wam(df.shape[0], df.shape[1], X, 1)
         # for row in mat:
         #     print(",".join(f'{x:.4f}' for x in row))
 
     if goal == "jacobi":
         sym_df = pd.read_csv(filename, header=None, dtype=float)
         sym_mat = sym_df.values.tolist()
-        jacobi_res = km.jacobi(sym_mat, 0)
+        jacobi_res = km.jacobi(sym_df.shape[0], sym_df.shape[0], sym_mat, 1)
         jacobi_vals = jacobi_res[0]
         jacobi_vectors = jacobi_res[1:]
         # print(",".join(f'{x:.4f}' for x in jacobi_vals))

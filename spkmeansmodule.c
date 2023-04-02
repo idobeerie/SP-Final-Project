@@ -48,23 +48,26 @@ static PyObject *wam_api(PyObject *self, PyObject *args) {
     PyObject *points;
     int n, d ;
     double **data_points;
-    if (!PyArg_ParseTuple(args, "iiO", &n, &d, &points)) {
+    char print;
+    if (!PyArg_ParseTuple(args, "iiOs", &n, &d, &points, &print)) {
         printf("An Error Has Occured");
         Py_RETURN_NONE;
     }
     data_points = create2DArrayFromPyObject(points, n, d);
     double **wam_matrix = wam(data_points, n, d);
     PyObject *result = create2DPyObject(wam_matrix, n, n);
-    print_matrix(wam_matrix, n, n);
-    free_matrix(data_points, n);
-    free_matrix(wam_matrix, n);
+    if (print == 'y'){
+        print_matrix(wam_matrix, n, n);}
+    free_matrix(data_points);
+    free_matrix(wam_matrix);
     return result;
 }
 static PyObject *ddg_api(PyObject *self, PyObject *args) {
     PyObject *points;
     int n, d ;
     double **data_points;
-    if (!PyArg_ParseTuple(args, "iiO", &n, &d, &points)) {
+    char print;
+    if (!PyArg_ParseTuple(args, "iiOs", &n, &d, &points, &print)) {
         printf("An Error Has Occured");
         Py_RETURN_NONE;
     }
@@ -72,30 +75,32 @@ static PyObject *ddg_api(PyObject *self, PyObject *args) {
     double **wam_matrix = wam(data_points, n, d);
     double **ddg_matrix = ddg(wam_matrix, n);
     PyObject *result = create2DPyObject(ddg_matrix, n, n);
-    print_matrix(ddg_matrix, n, n);
-    free_matrix(data_points, n);
-    free_matrix(wam_matrix, n);
-    free_matrix(ddg_matrix, n);
+    if (print == 'y'){
+        print_matrix(ddg_matrix, n, n);}
+    free_matrix(data_points);
+    free_matrix(wam_matrix);
+    free_matrix(ddg_matrix);
     return result;
 }
 static PyObject *gl_api(PyObject *self, PyObject *args) {
     PyObject *points;
-    int n, d ;
+    int n, d, p ;
     double **data_points;
-    if (!PyArg_ParseTuple(args, "iiO", &n, &d, &points)) {
+    if (!PyArg_ParseTuple(args, "iiOi", &n, &d, &points, &p)) {
         printf("An Error Has Occured");
         Py_RETURN_NONE;
     }
     data_points = create2DArrayFromPyObject(points, n, d);
     double **wam_matrix = wam(data_points, n, d);
     double **ddg_matrix = ddg(wam_matrix, n);
-    double **gl_matrix = gl(ddg_matrix, wam_matrix, n);
+    double **gl_matrix = gl_py(ddg_matrix, wam_matrix, n);
     PyObject *result = create2DPyObject(gl_matrix, n, n);
-    print_matrix(gl_matrix, n, n);
-    free_matrix(data_points, n);
-    free_matrix(wam_matrix, n);
-    free_matrix(ddg_matrix, n);
-    free_matrix(gl_matrix, n);
+    if (p == 1){
+        print_matrix(gl_matrix, n, n);}
+    // free_matrix(data_points);
+    // free_matrix(wam_matrix);
+    // free_matrix(ddg_matrix);
+    // free_matrix(gl_matrix);
     return result;
 }
 
@@ -103,27 +108,28 @@ static PyObject *jacobi_api(PyObject *self, PyObject *args) {
     PyObject *points;
     int n, d ;
     double **data_points;
-    if (!PyArg_ParseTuple(args, "iiO", &n, &d, &points)) {
+    int p;
+    if (!PyArg_ParseTuple(args, "iiOi", &n, &d, &points, &p)) {
         printf("An Error Has Occured");
         Py_RETURN_NONE;
     }
     data_points = create2DArrayFromPyObject(points, n, d);
     Jacobi_output *jacobi_matrix = jacobi(data_points, n);
     double **jacobi_res = create2DfromJacobi(jacobi_matrix, n);
-    print_matrix(jacobi_res, n, n);
+    if (p == 1){  print_matrix(jacobi_matrix->V, n+1, n);}
     PyObject *result = create2DPyObject(jacobi_res, n, n);
-    free_matrix(data_points, n);
-    free_matrix(jacobi_res, n);
-    free(jacobi_matrix->eigenValues);
-    free_matrix(jacobi_matrix->V, n);
-    free(jacobi_matrix);
+    // free_matrix(data_points);
+    // free_matrix(jacobi_res);
+    // free(jacobi_matrix->eigenValues);
+    // free_matrix(jacobi_matrix->V);
+    // free(jacobi_matrix);
     return result;
 }
 static PyObject *kmeans_pp_api(PyObject *self, PyObject *args) {
     PyObject *pyInitialCentroids, *pyPoints;
-    int k, n, d;
+    int k, n, d, p;
     double **initialCentroids, **points;
-    if (!PyArg_ParseTuple(args, "iiiOO", &k, &n, &d, &pyInitialCentroids, &pyPoints)) {
+    if (!PyArg_ParseTuple(args, "iiiOOi", &k, &n, &d, &pyInitialCentroids, &pyPoints, &p)) {
         printf("An Error Has Occured");
         Py_RETURN_NONE;
     }
@@ -131,11 +137,10 @@ static PyObject *kmeans_pp_api(PyObject *self, PyObject *args) {
     points = create2DArrayFromPyObject(pyPoints, n, d);
 
     double **finalCentroids = kmeans(points, initialCentroids, k, d, n, MAX_KMEANS_ITERS);
-
-    print_matrix(finalCentroids, k, d);
+    if (p == 1){  print_matrix(finalCentroids, k, d);}
     PyObject *result = create2DPyObject(finalCentroids, k, d);
-    free_matrix(points, n);
-    free_matrix(initialCentroids, k);
+    // free_matrix(points);
+    // free_matrix(initialCentroids);
     return result;
 }
 
