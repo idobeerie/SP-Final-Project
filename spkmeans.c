@@ -660,61 +660,7 @@ int *find_off_diag_max_abs_val(double **A, int n)
     return ij_list;
 }
 
-// double** jacobi(double** L, int n){
-//     int iter = 0, i=0, j=0, rows=0, cols=0;
-//     int* pivot = malloc(2 * sizeof(int));
-//     double c, s;
-//     double current_off, prev_off = 0.0, epsi = 1.0*0.00001;  //global maybe?
-//     current_off = off(L, n);
-//     double** prev_L = allocateMatrix(n, n);
-//     copy_matrix(L, prev_L, n, n);
-//     double** rotation;
-//     double** eigenVectors = allocateMatrix(n,n);// just the vectors
-//     double** eigenVecVal = allocateMatrix(n+1, n); // the first row will be the eigen values
-//     while(iter < 100 && (prev_off - current_off > epsi || iter == 0)){
-//         pivot = find_pivot(L, n);
-//         j = pivot[0];
-//         i = pivot[1];
-//         rotation = create_p(L, n);    //we can send i and j and not call find_pivot again
-//         if(iter == 0){
-//             copy_matrix(rotation, eigenVectors, n, n);
-//         }
-//         else{
-//             matrix_multiply(eigenVectors, rotation, n);
-//         }
-//         c = rotation[i][i];
-//         s = rotation[i][j];
-//         for(int k=0; k<n-1;k++){     // why is this n-1??
-//             L[i][k] = c*prev_L[i][k] - s*prev_L[j][k];
-//             L[j][k] = s*prev_L[i][k] + c*prev_L[j][k];
-//             L[k][i] = c*prev_L[k][i] - s*prev_L[k][j];
-//             L[k][j] = s*prev_L[k][i] + c*prev_L[k][j];
-//         }
-//         L[i][i] = c*c*prev_L[i][i] - 2*c*s*prev_L[i][j] + s*s*prev_L[j][j];
-//         L[j][j] = s*s*prev_L[i][i] + 2*c*s*prev_L[i][j] + c*c*prev_L[j][j];
-//         L[i][j] = (c*c-s*s)*L[i][j] + c*s*(prev_L[i][i] - prev_L[j][j]);
-//         L[j][i] = prev_L[i][j];
-//         iter++;
-//         prev_off = current_off;
-//         current_off = off(L, n);
-//         copy_matrix(L, prev_L, n, n);
-//         free(rotation);
-//     }
-//     for(rows = 0; rows < n + 1; rows++){
-//         for(cols = 0; cols < n; cols++){
-//             if(rows == 0){
-//                 eigenVecVal[rows][cols] = L[cols][cols];
-//             }
-//             else{
-//                 eigenVecVal[rows][cols] = eigenVectors[rows-1][cols];
-//             }
-//         }
-//     }
-//     free(eigenVectors);
-//     free(prev_L);
-//     free(pivot);
-//     return eigenVecVal;
-// }
+
 
 void print_list(double *array, int len)
 {
