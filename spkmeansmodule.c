@@ -15,7 +15,6 @@ static double** create2DArrayFromPyObject(PyObject *data, int n, int d) {
 
     points = alloc_nXm_matrix(n,d);
     verifyNotNULL(points)
-
     for (i = 0; i < n; i++) {
         temp_point = PyList_GetItem(data, i);
         for (j = 0; j < d; j++) {
@@ -41,6 +40,26 @@ static PyObject *create2DPyObject(double** matrix, int n, int d) {
     PyList_SET_ITEM(pyMatrix, i, currentVector);
     }
     return pyMatrix;
+}
+
+static PyObject *getT_api(PyObject *self, PyObject *args) {    //this will return the sorted matrix we need and the k value
+    PyObject *pyPoints;
+    PyObject *pyT;
+    int k, n, d;
+    double **T, **points;
+    if (!PyArg_ParseTuple(args, "iiiO", &k, &n, &d, &pyPoints)) {
+        printf("An Error Has Occured");
+        Py_RETURN_NONE;
+    }
+    points = create2DArrayFromPyObject(pyPoints, n, d);
+
+    // T=getT(points,d,n,&k);
+    // pyT = create2DPyObject(T,n,k);
+
+    // free_contiguous_mat(points);
+    // free_contiguous_mat(T);
+    // return Py_BuildValue("[Oi]", pyT, k);
+    Py_RETURN_NONE;
 }
 
 /*--------------------------------- c-api -----------------------------------------------------*/
@@ -116,7 +135,8 @@ static PyObject *jacobi_api(PyObject *self, PyObject *args) {
     data_points = create2DArrayFromPyObject(points, n, d);
     Jacobi_output *jacobi_matrix = jacobi(data_points, n);
     double **jacobi_res = create2DfromJacobi(jacobi_matrix, n);
-    if (p == 1){  print_matrix(jacobi_matrix->V, n+1, n);}
+    if (p == 1){  
+        print_matrix(jacobi_res, n+1, n);}
     PyObject *result = create2DPyObject(jacobi_res, n, n);
     // free_matrix(data_points);
     // free_matrix(jacobi_res);
@@ -125,6 +145,7 @@ static PyObject *jacobi_api(PyObject *self, PyObject *args) {
     // free(jacobi_matrix);
     return result;
 }
+
 static PyObject *kmeans_pp_api(PyObject *self, PyObject *args) {
     PyObject *pyInitialCentroids, *pyPoints;
     int k, n, d, p;
@@ -133,15 +154,14 @@ static PyObject *kmeans_pp_api(PyObject *self, PyObject *args) {
         printf("An Error Has Occured");
         Py_RETURN_NONE;
     }
-    initialCentroids = create2DArrayFromPyObject(pyInitialCentroids, k, d);
-    points = create2DArrayFromPyObject(pyPoints, n, d);
-
-    double **finalCentroids = kmeans(points, initialCentroids, k, d, n, MAX_KMEANS_ITERS);
+    initialCentroids = create2DArrayFromPyObject(pyInitialCentroids, d, d);
+    points = create2DArrayFromPyObject(pyPoints, n-1, d);
+    double **finalCentroids = kmeans(points, initialCentroids, k, d, n-1, MAX_KMEANS_ITERS);
     if (p == 1){  print_matrix(finalCentroids, k, d);}
     PyObject *result = create2DPyObject(finalCentroids, k, d);
-    // free_matrix(points);
-    // free_matrix(initialCentroids);
-    return result;
+    free_matrix(points);
+    free_matrix(initialCentroids);
+    Py_RETURN_NONE;
 }
 
 
@@ -152,6 +172,7 @@ static PyMethodDef methods[] = {
     {"ddg",(PyCFunction)ddg_api,METH_VARARGS,PyDoc_STR("takes points list(2D), returns the diagonal degree matrix")},
     {"gl",(PyCFunction)gl_api,METH_VARARGS,PyDoc_STR("takes points list(2D), returns the graph laplacian matrix")},
     {"jacobi",(PyCFunction)jacobi_api,METH_VARARGS,PyDoc_STR("jacobis on a symmetric matrix,second argument should be \"sorted\" for spk purposes\n, returns(values,vectors matrix,k)")},
+    {"getU",(PyCFunction)getT_api,METH_VARARGS,PyDoc_STR("takes points list(2D), returns the U matrix")},
       /*  The docstring for the function */
     {NULL, NULL, 0, NULL}     
 

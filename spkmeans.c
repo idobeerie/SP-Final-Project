@@ -474,6 +474,8 @@ double **calc_A_tag(double **A_tag, double **A, int n, rotation_mat *P)
     return A_tag;
 }
 
+
+
 /*//////////////////////////////////////// Jacobi Algorithm: //////////////////////////////////////////////////////*/
 /* ----------------------- Jacobi main function: ---------------------------------*/
 
@@ -516,11 +518,118 @@ Jacobi_output *jacobi(double **A, int n)
     output_struct->eigenValues = eigenValues;
     output_struct->V = V;
 
-    free(P);
-    free_contiguous_mat(A_tag);
-    free_contiguous_mat(A);
+    // free(P);
+    // free_contiguous_mat(A_tag);
+    // free_contiguous_mat(A);
 
     return output_struct;
+}
+
+int compare_eigenStruct(const void *a, const void *b)
+{
+    eigenStruct A = *(eigenStruct *)a;
+    eigenStruct B = *(eigenStruct *)b;
+    if (*(A.Pointer) > *(B.Pointer))
+        return 1;
+    else if (*(A.Pointer) < *(B.Pointer))
+        return -1;
+    else{
+        if (A.originalIndex > B.originalIndex)
+            return 1;
+        else if (A.originalIndex < B.originalIndex)
+            return -1;
+        else
+            return 0;
+    }
+       
+}
+
+double **calc_T(Jacobi_output *jacobiOutput, int n, int *k_pointer){
+    /* if k == 0 it recalculate k and change it in memory. */
+    int i,j, original_j, k;
+    double line_sum, gap, max_gap = 0 ;
+    double *eigenValues = jacobiOutput -> eigenValues;
+    double **V = jacobiOutput -> V;
+    double **U;
+    double **T;
+    eigenStruct eigenStructI;
+    /* creating a list of pointers to the eigenvalues, that will be used to sort the eigenvectors according to the eigenvalue and original index: */
+    eigenStruct *pointers_list = malloc(n*sizeof(eigenStruct));
+    verifyNotNULL(pointers_list)
+
+    /* filling a pointers list of the eigenvalues: */
+    for (i=0 ; i<n ; i++){
+        eigenStructI.Pointer = &(eigenValues[i]);
+        eigenStructI.originalIndex = i; /* saving the original index in eigenvalue array to enable a stable sort */
+        pointers_list[i] = eigenStructI;
+    }
+
+    /* sorting the pointers list: */
+    qsort(pointers_list, n, sizeof(eigenStruct), compare_eigenStruct);
+
+
+
+    /* finding k using the sorted pointers list: */
+    if (*k_pointer == 0){
+        k = 1;
+        for (i=1 ; i<n/2+1 ; i++){
+            gap = fabs((*(pointers_list[i-1].Pointer)) - (*(pointers_list[i].Pointer)));
+            if (gap > max_gap){
+                max_gap=gap;
+                k=i;
+            }
+        }
+        *k_pointer = k;
+    /* or extracting k that was given as a parameter: */
+    } else{
+        k = *k_pointer;
+    }
+
+
+    /* forming the matrix U that contain the k first eigenvectors: */
+    U = alloc_nXm_matrix(n,k);
+    for(j=0; j<k; j++){
+        original_j = (int)(((pointers_list[j].Pointer) - eigenValues)); /* the column index of the eigenvector that fits eigenvalue number j. */
+        for (i=0; i<n; i++){
+            U[i][j] = V[i][original_j];
+        }
+    }
+
+    /* forming the matrix T from U: */
+    T = alloc_nXm_matrix(n,k);
+    for(i=0; i<n; i++){
+        line_sum = 0;
+        for (j=0; j<k; j++){
+            line_sum += U[i][j] * U[i][j];
+        }
+        for (j=0; j<k; j++){
+            if (line_sum != 0)
+                T[i][j] = U[i][j]/(sqrt(line_sum));
+            else /* according to the answers at the forum it doesnt suppose to happen in a valid input data */
+                T[i][j] = U[i][j];
+        }
+    }
+
+    free(pointers_list);
+    free_contiguous_mat(U);
+
+    return T;
+}
+Jacobi_output* get_jacobi(double** dots, int d, int n){
+    double** W = wam(dots, d, n);//this is freed in gl
+    double ** D = ddg(W, n);   //this is freed in gl
+    double** L = gl_py(D, W, n);
+    Jacobi_output* jacobi_res = jacobi(L, n);
+    return jacobi_res;
+}
+
+double** getT(double **dots, int d, int n, int *k){
+    Jacobi_output* jacobi_output = get_jacobi(dots,d,n);
+    double** T = calc_T(jacobi_output,n,k);
+    // free_contiguous_mat(jacobi_output->V);
+    // free(jacobi_output->eigenValues);
+    // free(jacobi_output);
+    return T;
 }
 
 int *find_off_diag_max_abs_val(double **A, int n)
@@ -700,7 +809,6 @@ double **kmeans(double **dots,double **centroids, int k, int d, int n, int max_i
     for(i=0; i<n; i++)
         dots_location[i] = -1;
 
-
     /* the kmeans algorithm flow :*/
     while(iter_counter < max_iter){
 
@@ -719,7 +827,6 @@ double **kmeans(double **dots,double **centroids, int k, int d, int n, int max_i
 
         iter_counter+=1;
     } /* end of while */
-
     /* frees */
     free(dots_location);
     for(i=0 ; i<k ; i++) {
