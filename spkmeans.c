@@ -518,9 +518,9 @@ Jacobi_output *jacobi(double **A, int n)
     output_struct->eigenValues = eigenValues;
     output_struct->V = V;
 
-    // free(P);
-    // free_contiguous_mat(A_tag);
-    // free_contiguous_mat(A);
+    free(P);
+    free_contiguous_mat(A_tag);
+    free_contiguous_mat(A);
 
     return output_struct;
 }

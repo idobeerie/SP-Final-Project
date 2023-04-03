@@ -240,7 +240,6 @@ if __name__ == '__main__':
         jacobi_res = km.jacobi(sym_df.shape[0], sym_df.shape[0], sym_mat, 1)
         jacobi_vals = jacobi_res[0]
         jacobi_vectors = jacobi_res[1:]
-        print(type(jacobi_vectors))
         # print(",".join(f'{x:.4f}' for x in jacobi_vals))
         # for row in jacobi_vectors:
             # print(",".join(f'{x:.4f}' for x in row)

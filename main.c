@@ -76,6 +76,10 @@ int main(int argc, char** argv){
         free_contiguous_mat(adj_matrix);
         free_contiguous_mat(degree_matrix);
     }
+    //double **kmeans(double **dots,double **centroids, int k, int d, int n, int max_iter) {
+    if(strcmp("spk", goal) == 0){
+        kmeans(centroids, , , , , 300)
+    }
     free_contiguous_mat(centroids);
     return 1;  
 }
