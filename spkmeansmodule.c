@@ -390,15 +390,15 @@ static PyObject *wam_api(PyObject *self, PyObject *args) {
     PyObject *points;
     int n, d ;
     double **data_points;
-    char print;
-    if (!PyArg_ParseTuple(args, "iiOs", &n, &d, &points, &print)) {
+    int print;
+    if (!PyArg_ParseTuple(args, "iiOi", &n, &d, &points, &print)) {
         printf("An Error Has Occured");
         Py_RETURN_NONE;
     }
     data_points = create2DArrayFromPyObject(points, n, d);
     double **wam_matrix = wam(data_points, n, d);
     PyObject *result = create2DPyObject(wam_matrix, n, n);
-    if (print == 'y'){
+    if (print == 1){
         print_matrix(wam_matrix, n, n);}
     free_matrix(data_points);
     free_matrix(wam_matrix);
@@ -408,8 +408,8 @@ static PyObject *ddg_api(PyObject *self, PyObject *args) {
     PyObject *points;
     int n, d ;
     double **data_points;
-    char print;
-    if (!PyArg_ParseTuple(args, "iiOs", &n, &d, &points, &print)) {
+    int print;
+    if (!PyArg_ParseTuple(args, "iiOi", &n, &d, &points, &print)) {
         printf("An Error Has Occured");
         Py_RETURN_NONE;
     }
@@ -417,7 +417,7 @@ static PyObject *ddg_api(PyObject *self, PyObject *args) {
     double **wam_matrix = wam(data_points, n, d);
     double **ddg_matrix = ddg(wam_matrix, n);
     PyObject *result = create2DPyObject(ddg_matrix, n, n);
-    if (print == 'y'){
+    if (print == 1){
         print_matrix(ddg_matrix, n, n);}
     free_matrix(data_points);
     free_matrix(wam_matrix);
