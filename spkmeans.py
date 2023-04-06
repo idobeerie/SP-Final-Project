@@ -156,7 +156,6 @@ if __name__ == '__main__':
         X = dff.values.tolist()
         n = dff.shape[0]
         d = dff.shape[1]
-        
         # 1. get jacobi result
         #2. get k: if k = 0 then k = max_dif else k = k
         #3. sort by first row of jacobi (eigenvalues) and get the first k columns (each row here is a point for kmeans++)
@@ -166,10 +165,9 @@ if __name__ == '__main__':
         eigen_vals = np.array(jacobi_res)
         #sorted_j = eigen_vals[:,eigen_vals[0, :].argsort()]
         eigenvaulues_arr = eigen_vals[0]
-
-        
        
         eigenvector_arr = eigen_vals[1:]
+
         i = np.argsort(eigenvaulues_arr)
         eigenvector_arr =  eigenvector_arr[:,i]
         eigenvaulues_arr = np.sort(eigenvaulues_arr)

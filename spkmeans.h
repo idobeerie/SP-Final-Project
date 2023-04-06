@@ -45,19 +45,14 @@ void print_list(double *array, int len);
 double** calc_A_tag(double** A_tag, double** A, int n, rotation_mat* P);
 double** ddg(double** adj_matrix, int n);
 void free_contiguous_mat(double** mat);
-double** getT(double **dots, int d, int n, int *k);
 double** gl(double** D, double** W, int n);
-Jacobi_output* get_jacobi(double** dots, int d, int n);
 void multiply_rotation_matrix(double** V, rotation_mat* P, int n);
 double** transpose(double** A, int n);
-double **calc_T(Jacobi_output *jacobiOutput, int n, int *k_pointer);
 double **gl_py(double **D, double **W, int n);
 double** deepCopy2DArray(double **A, int row_num, int col_num);
 void print_matrix(double** mat, int n, int m);
 
 void free_matrix(double** mat);
-double **calc_T(Jacobi_output *jacobiOutput, int n, int *k_pointer);
-int compare_eigenStruct(const void *a, const void *b);
 Jacobi_output* jacobi(double** L, int n);
 
 #endif
