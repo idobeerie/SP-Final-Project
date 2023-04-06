@@ -5,7 +5,7 @@
 
 /* C Api Declarations: */
 static double** create2DArrayFromPyObject(PyObject *data, int n, int d);
-static PyObject* create2DPyObject(double **data, int n, int d);
+static PyObject *create2DPyObject(double** matrix, int n, int d);
 #define verifyNotNULL(var) if((var)==NULL) {printf("An Error Has Occured"); exit(-1);}
 /*
 this is the part of out last HW2
@@ -349,6 +349,8 @@ static double** create2DArrayFromPyObject(PyObject *data, int n, int d) {
 }
 static PyObject *create2DPyObject(double** matrix, int n, int d) {
     int i,j;
+    // PyObject *pyMatrix;
+    // PyObject *row;
     PyObject *currentVector, *pyMatrix,*num;
     pyMatrix = PyList_New(n);
     verifyNotNULL(pyMatrix)
@@ -363,6 +365,14 @@ static PyObject *create2DPyObject(double** matrix, int n, int d) {
     PyList_SET_ITEM(pyMatrix, i, currentVector);
     }
     return pyMatrix;
+    // for (i = 0; i < n; i++) {
+    //     row = PyList_New(d);
+    //     PyList_SET_ITEM(pyMatrix, i, row);  
+    //     for (j = 0; j < d; j++) {
+    //         PyList_SET_ITEM(row, j, PyFloat_FromDouble(matrix[i][j]));
+    //     }
+    // }
+    // return pyMatrix;
 }
 
 
@@ -451,24 +461,172 @@ static PyObject *jacobi_api(PyObject *self, PyObject *args) {
     return result;
 }
 
-static PyObject *kmeans_pp_api(PyObject *self, PyObject *args) {
-    PyObject *pyInitialCentroids, *pyPoints;
-    int k, n, d;
-    double **initialCentroids, **points;
-    if (!PyArg_ParseTuple(args, "iiiOO", &k, &n, &d, &pyInitialCentroids, &pyPoints)) {
-        printf("An Error Has Occured");
-        Py_RETURN_NONE;
+
+double euc_d(double* p, double* q, size_t dim) {
+    double d_sqrd_sum = 0;
+    size_t i = 0;
+    while (i < dim) {
+        d_sqrd_sum += pow(p[i] - q[i], 2);
+        i++;
     }
-    initialCentroids = create2DArrayFromPyObject(pyInitialCentroids, d, d);
-    printf("after _init");
-    points = create2DArrayFromPyObject(pyPoints, n, d);
-    printf("after points");
-    double **finalCentroids = kmeans(points, initialCentroids, k, d, n, MAX_KMEANS_ITERS);
-    PyObject *result = create2DPyObject(finalCentroids, k, d);
-    free_matrix(points);
-    free_matrix(initialCentroids);
-    return result;
+    return sqrt(d_sqrd_sum);
 }
+
+
+static PyObject *kmeans_pp_api(PyObject *self, PyObject *args) {
+    // PyObject *pyInitialCentroids, *pyPoints;
+    // int k, n, d;
+    // double **initialCentroids, **points;
+    // if (!PyArg_ParseTuple(args, "iiiOO", &k, &n, &d, &pyInitialCentroids, &pyPoints)) {
+    //     printf("An Error Has Occured");
+    //     Py_RETURN_NONE;
+    // }
+    // initialCentroids = create2DArrayFromPyObject(pyInitialCentroids, d, d);
+    // points = create2DArrayFromPyObject(pyPoints, n, d);
+    // double **finalCentroids = kmeans(points, initialCentroids, k, d, n, MAX_KMEANS_ITERS);
+    // print_2d_array(finalCentroids, k, d);
+    // PyObject *result = create2DPyObject(finalCentroids, k, d);
+    // free_matrix(points);
+    // free_matrix(initialCentroids);
+    // return result;
+    PyObject* data_lst;
+    PyObject* centroid_lst;
+    PyObject* point;
+    size_t iter;
+    double epsilon;
+    if (!PyArg_ParseTuple(args, "OOnd", &data_lst, &centroid_lst, &iter, &epsilon)) {
+        PyErr_SetString(PyExc_MemoryError, "An Error Has Occurred");
+        return NULL;
+    }
+    /*data_lst = dataframe */
+    size_t no_points = PyObject_Length(data_lst);
+    point = PyList_GetItem(data_lst, 0);
+    size_t dimension = PyObject_Length(point);
+    size_t centroid_size = PyObject_Length(centroid_lst);
+
+    double* p = NULL;
+    double** data = NULL;
+    double* b = NULL;
+    double** cluster_mean = NULL;
+    double* c = NULL;
+    double** new_cluster = NULL;
+    size_t j, m, i;
+    data = calloc(no_points, sizeof(double*));
+    if (!data) {
+        PyErr_SetString(PyExc_MemoryError, "An Error Has Occurred");
+        // free_memory(b, c, p, new_cluster, cluster_mean, data);
+        return NULL;
+    }
+    p = NULL;
+    p = (double*)calloc(no_points * dimension, sizeof(double));
+    if (!p) {
+        PyErr_SetString(PyExc_MemoryError, "An Error Has Occurred");
+        // free_memory(b, c, p, new_cluster, cluster_mean, data);
+        return NULL;
+    }
+    for (i = 0; i < no_points; i++) {
+        data[i] = p + i * dimension;
+    }
+    for (i = 0; i < no_points; i++) {
+        point = PyList_GetItem(data_lst, i);
+        for (j = 0; j < dimension; j++) {
+            data[i][j] = PyFloat_AsDouble(PyList_GetItem(point, j));
+            //printf("%f,", data[i][j]);
+        }
+    }
+    // /convert current cluster list to a c array/
+    b = calloc(centroid_size * dimension, sizeof(double));
+    cluster_mean = calloc(centroid_size, sizeof(double*));
+    if (!b || !cluster_mean) {
+        PyErr_SetString(PyExc_MemoryError, "An Error Has Occurred");
+        // free_memory(b, c, p, new_cluster, cluster_mean, data);
+        return NULL;
+    }
+    for (i = 0; i < centroid_size; i++) {
+        cluster_mean[i] = b + i * (dimension);
+    }
+
+    for (i = 0; i < centroid_size; i++) {
+        point = PyList_GetItem(centroid_lst, i);
+        for (j = 0; j < dimension; j++) {
+            cluster_mean[i][j] = PyFloat_AsDouble(PyList_GetItem(point, j));
+        }
+    }
+    // /main algorithm/
+    double** curr_X = data;
+    // /allocate temporary clusters to decide convergence/
+    c = calloc(centroid_size * (dimension + 1), sizeof(double));
+    new_cluster = calloc(centroid_size, sizeof(double*));
+    if (!c || !new_cluster) {
+        PyErr_SetString(PyExc_MemoryError, "An Error Has Occurred");
+        // free_memory(b, c, p, new_cluster, cluster_mean, data);
+        return NULL;
+    }
+    for (i = 0; i < centroid_size; i++) {
+        new_cluster[i] = c + i * (dimension + 1);
+    }
+
+    i = 0;
+    int converged = 0;
+    while (i < iter && !converged) {
+        // /zero out new cluster array/
+        memset(c, 0, centroid_size * (dimension + 1) * sizeof(double));
+        // /decide closest cluster against the original and update it with new Xi/
+        for (m = 0; m < no_points; m++) {
+            size_t min_cluster_index = 0;
+            double min_value = INT32_MAX;
+            for (j = 0; j < centroid_size; j++) {
+                double curr_euc_d = euc_d(cluster_mean[j], *(curr_X + m), dimension);
+                if (curr_euc_d < min_value) {
+                    min_value = curr_euc_d;
+                    min_cluster_index = j;
+                }
+            }
+            // /updating new cluster, just adding for now. divide later./
+            double* min_cluster = new_cluster[min_cluster_index];
+            for (j = 0; j < dimension; j++) {
+                min_cluster[j] += curr_X[m][j];
+            }
+            min_cluster[dimension]++;
+        }
+        // /calculate the actual means/
+        for (j = 0; j < centroid_size; j++) {
+            for (m = 0; m < dimension; m++) {
+                new_cluster[j][m] /= new_cluster[j][dimension];
+            }
+        }
+
+        // /decide convegerence/
+        double max_Duk = 0;
+        double curr_Muk = 0;
+        for (j = 0; j < centroid_size; j++) {
+            curr_Muk = euc_d(cluster_mean[j], new_cluster[j], dimension);
+            if (curr_Muk > max_Duk)
+                max_Duk = curr_Muk;
+        }
+        if (max_Duk <= epsilon) {
+            // /print statement for debugging/
+            // /printf("Converged after: %d iterations\n", (int)i + 1);/
+            converged = 1;
+        }
+        i++;
+        // /copy new cluster to old ones/
+        for (j = 0; j < centroid_size; j++) {
+            for (m = 0; m < dimension; m++) {
+                cluster_mean[j][m] = new_cluster[j][m];
+            }
+        }
+    }
+    PyObject* py_centroids = PyList_New(centroid_size);
+    for (m = 0; m < centroid_size; m++) {
+        PyObject* m_cluster = PyList_New(dimension);
+        PyList_SetItem(py_centroids, m, m_cluster);        //raises exception
+        for (j = 0; j < dimension; j++) {
+            PyList_SetItem(m_cluster, j, PyFloat_FromDouble(cluster_mean[m][j]));
+        }
+    }
+    return py_centroids;
+    }
 
 
 

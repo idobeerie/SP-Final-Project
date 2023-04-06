@@ -161,11 +161,14 @@ if __name__ == '__main__':
         #3. sort by first row of jacobi (eigenvalues) and get the first k columns (each row here is a point for kmeans++)
         #3.1 create centroids for kmeans++ with the first k columns of jacobi
         #4 do kmeans++ with k and the first k columns of jacobi
-        jacobi_res = km.jacobi(n, d, X, 0)
+        gl_res = km.gl(n, d, X, 0)
+        print(gl_res)
+        jacobi_res = km.jacobi(n, d, gl_res, 0)
+        # print(jacobi_res)
         eigen_vals = np.array(jacobi_res)
         #sorted_j = eigen_vals[:,eigen_vals[0, :].argsort()]
         eigenvaulues_arr = eigen_vals[0]
-       
+        print(jacobi_res[0])
         eigenvector_arr = eigen_vals[1:]
 
         i = np.argsort(eigenvaulues_arr)
@@ -181,63 +184,37 @@ if __name__ == '__main__':
             k = math.floor(max_dif_idx) + 1
         eigen_vectors = eigenvector_arr[:, :k]
         ev_df = pd.DataFrame(eigen_vectors)
-       
         starting_centroids_df, starting_centroids_indices = init_centroids(ev_df, k)
         starting_centroids = starting_centroids_df.values.tolist()
         # res_spk = km.spk(k, n, k, starting_centroids, eigen_vectors, 1)
-        res_spk = km.spk(k,n,k,starting_centroids, eigen_vectors.tolist())
-        # df = pd.DataFrame({'coordinates':[i for i in eigen_vectors]})
-        # chosen = np.random.choice(df.index)
-        # centroids = pd.DataFrame(df['coordinates'].filter(items = [chosen]))
-        # scatters = df.drop(chosen,axis=0)
-        # while (len(centroids) != k):
-        #         probs = []
-        #         for scatter in scatters["coordinates"]:
-        #             def euc_dist(x): return np.linalg.norm(x - scatter)
-        #             probs += [min(centroids["coordinates"].map(euc_dist))]
-        #         probs = np.array(probs)
-        #         probs = probs / sum(probs)
-        #         chosen = (np.random.choice(scatters.index, p=probs))
-        #         added_to_centroids = pd.DataFrame(
-        #             scatters["coordinates"].filter(items=[chosen]))
-        #         centroids = pd.concat([centroids, added_to_centroids])
-        #         scatters = scatters.drop(chosen, axis=0)
-        # dataPointList = [arr.tolist() for arr in scatters["coordinates"]]
-        # centroidsList = [arr.tolist() for arr in centroids["coordinates"]]
-        # dataPointList = dataPointList+centroidsList
-        # Prints centroid's indices.
-        # for i in centroids.index[0: -1]:
-        #     print(i, end=",")
-        # print(centroids.index[len(centroids.index) - 1])
+        # print(",".join(f'{x:.0f}' for x in starting_centroids_indices))
+        res_spk = km.spk(eigen_vectors.tolist(), starting_centroids, 300, 0.0)
        
-        print(",".join(f'{x:.0f}' for x in starting_centroids_indices))
-
         for j in range(0, len(res_spk)):
             for i in range(0, len(res_spk[0])):
                 res_spk[j][i] = round(res_spk[j][i], 4)
 
-        for result in res_spk:
-            print(','.join(str(x) for x in res_spk))
+        # for result in res_spk:
+        #     print(','.join(str(x) for x in res_spk))
         
     if goal in["gl", "ddg", "wam"]:
         df = pd.read_csv(filename, header=None, dtype=float)
         X = df.values.tolist()
-
         if goal == "gl":
-            mat = km.gl(df.shape[0], df.shape[1], X, 1)
+            mat = km.gl(df.shape[0], df.shape[1], X, 0)
         elif goal == "ddg":
-            mat = km.ddg(df.shape[0], df.shape[1], X, 1)
+            mat = km.ddg(df.shape[0], df.shape[1], X, 0)
         elif goal == "wam":
-            mat = km.wam(df.shape[0], df.shape[1], X, 1)
-        # for row in mat:
-        #     print(",".join(f'{x:.4f}' for x in row))
+            mat = km.wam(df.shape[0], df.shape[1], X, 0)
+        for row in mat:
+            print(",".join(f'{x:.4f}' for x in row))
 
     if goal == "jacobi":
         sym_df = pd.read_csv(filename, header=None, dtype=float)
         sym_mat = sym_df.values.tolist()
-        jacobi_res = km.jacobi(sym_df.shape[0], sym_df.shape[0], sym_mat, 1)
+        jacobi_res = km.jacobi(sym_df.shape[0], sym_df.shape[1], sym_mat, 1)
         jacobi_vals = jacobi_res[0]
         jacobi_vectors = jacobi_res[1:]
         # print(",".join(f'{x:.4f}' for x in jacobi_vals))
         # for row in jacobi_vectors:
-            # print(",".join(f'{x:.4f}' for x in row)
+        #     print(",".join(f'{x:.4f}' for x in row))
