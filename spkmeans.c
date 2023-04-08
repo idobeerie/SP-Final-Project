@@ -7,7 +7,7 @@
         printf("An Error Has Occured"); \
         exit(-1);                       \
     }
-#define EPSILON (1 / 100000)
+#define EPSILON 0.00001
 
 double **allocateMatrix(size_t rows, size_t cols)
 { // i really dont remember writing this, dont think we need it
@@ -32,10 +32,11 @@ double **allocateMatrix(size_t rows, size_t cols)
 double **create2DfromJacobi(Jacobi_output *jacobi_output, int n)
 {
     double **output = allocateMatrix(n+1, n);
+    int j=0,i=0;
     output[0] = jacobi_output->eigenValues;
-    for (int i = 0; i < n; i++)
+    for ( i= 0; i < n; i++)
     {
-        for (int j = 0; j < n; j++)
+        for (j = 0; j < n; j++)
         {
             output[i+1][j] = jacobi_output->V[i][j];
         }

@@ -9,16 +9,16 @@
             "program": "${workspaceFolder}/spkmeans.py",
             "console": "integratedTerminal",
             "cwd": "${workspaceFolder}",
-            "args":["spk","test1.txt"]
+            "args":["spk","./tests/test_batch/test10.txt"]
         },
         {
             "name": "(gdb) Launch",
             "type": "cppdbg",
             "request": "launch",
-            "program": "spkmeans",
+            "program": "${workspaceFolder}/spkmeans",
             "args": [
-                "wam",
-                "test1.txt"
+                "jacobi",
+                "t.txt"
             ],
             "stopAtEntry": false,
             "cwd": "${fileDirname}",

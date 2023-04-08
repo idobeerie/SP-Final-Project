@@ -343,6 +343,7 @@ static double** create2DArrayFromPyObject(PyObject *data, int n, int d) {
         for (j = 0; j < d; j++) {
             inner_item = PyList_GetItem(temp_point, j);
             points[i][j] = PyFloat_AsDouble(inner_item);
+            
         }
     }
     return points;
@@ -449,6 +450,7 @@ static PyObject *jacobi_api(PyObject *self, PyObject *args) {
     }
     data_points = create2DArrayFromPyObject(points, n, d);
     Jacobi_output *jacobi_matrix = jacobi(data_points, n);
+
     double **jacobi_res = create2DfromJacobi(jacobi_matrix, n);
     if (p == 1){  
         print_matrix(jacobi_res, n+1, n);}

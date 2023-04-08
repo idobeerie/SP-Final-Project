@@ -38,7 +38,7 @@ def kmeansPlusPlus(data, k, indexes):
         new_centroid, index = selectNextCentroid(data, centroids, indexes)
         centroids.append(new_centroid)
         result_indexes += f"{index}, "
-    print(result_indexes[:-2])
+   #print(result_indexes[:-2])
     return centroids
 
 
@@ -156,19 +156,10 @@ if __name__ == '__main__':
         X = dff.values.tolist()
         n = dff.shape[0]
         d = dff.shape[1]
-        # 1. get jacobi result
-        #2. get k: if k = 0 then k = max_dif else k = k
-        #3. sort by first row of jacobi (eigenvalues) and get the first k columns (each row here is a point for kmeans++)
-        #3.1 create centroids for kmeans++ with the first k columns of jacobi
-        #4 do kmeans++ with k and the first k columns of jacobi
         gl_res = km.gl(n, d, X, 0)
-        print(gl_res)
-        jacobi_res = km.jacobi(n, d, gl_res, 0)
-        # print(jacobi_res)
+        jacobi_res = km.jacobi(n, n, gl_res, 0)
         eigen_vals = np.array(jacobi_res)
-        #sorted_j = eigen_vals[:,eigen_vals[0, :].argsort()]
         eigenvaulues_arr = eigen_vals[0]
-        print(jacobi_res[0])
         eigenvector_arr = eigen_vals[1:]
 
         i = np.argsort(eigenvaulues_arr)
@@ -178,24 +169,24 @@ if __name__ == '__main__':
         max_dif_idx = 0
         if k ==0:
             for i in range(0, int(len(eigenvaulues_arr) /2)+1):
-                if eigenvaulues_arr[i+1] - eigenvaulues_arr[i] > max_dif:
-                    max_dif = eigenvaulues_arr[i+1] - eigenvaulues_arr[i]
-                    max_dif_idx = i
-            k = math.floor(max_dif_idx) + 1
+                if math.fabs(eigenvaulues_arr[i] - eigenvaulues_arr[i+1]) > max_dif:
+                    max_dif = math.fabs(eigenvaulues_arr[i] - eigenvaulues_arr[i+1])
+                    max_dif_idx = i+1
+            k = math.floor(max_dif_idx) 
         eigen_vectors = eigenvector_arr[:, :k]
         ev_df = pd.DataFrame(eigen_vectors)
         starting_centroids_df, starting_centroids_indices = init_centroids(ev_df, k)
         starting_centroids = starting_centroids_df.values.tolist()
-        # res_spk = km.spk(k, n, k, starting_centroids, eigen_vectors, 1)
-        # print(",".join(f'{x:.0f}' for x in starting_centroids_indices))
+        print(",".join(f'{x:.0f}' for x in starting_centroids_indices))
         res_spk = km.spk(eigen_vectors.tolist(), starting_centroids, 300, 0.0)
        
-        for j in range(0, len(res_spk)):
-            for i in range(0, len(res_spk[0])):
-                res_spk[j][i] = round(res_spk[j][i], 4)
+        # for j in range(0, len(res_spk)):
+        #     for i in range(0, len(res_spk[0])):
+        #         res_spk[j][i] = round(res_spk[j][i], 4)
 
-        # for result in res_spk:
-        #     print(','.join(str(x) for x in res_spk))
+        for result in res_spk:
+            result = [round(num,4) for num in result]
+            print(','.join(map(str, result)))
         
     if goal in["gl", "ddg", "wam"]:
         df = pd.read_csv(filename, header=None, dtype=float)
