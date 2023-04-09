@@ -16,11 +16,8 @@ double **allocateMatrix(size_t rows, size_t cols)
     size_t i;
     data = calloc(rows * cols, sizeof(double));
     matrix = calloc(rows, sizeof(double *));
-    if (data == NULL || matrix == NULL)
-    {
-        free(data);
-        free(matrix);
-    }
+    verifyNotNULL(data);
+    verifyNotNULL(matrix);
     for (i = 0; i < rows; i++)
     {
         matrix[i] = data + i * cols;
@@ -313,7 +310,7 @@ rotation_mat *calc_rotation_mat(rotation_mat *P, double **A, int n)
 
 double calc_of_f_square(double **A, int n)
 {
-    double diagonal_elementwise_sum_square = 0, matrix_elementwise_sum_square = 0, f_norm;
+    double diagonal_elementwise_sum_square = 0, matrix_elementwise_sum_square = 0, f;
     int i, j;
 
     for (i = 0; i < n; i++)
@@ -323,9 +320,9 @@ double calc_of_f_square(double **A, int n)
     for (i = 0; i < n; i++)
         diagonal_elementwise_sum_square += pow(A[i][i], 2);
 
-    f_norm = sqrt(matrix_elementwise_sum_square);
+    f = sqrt(matrix_elementwise_sum_square);
 
-    return f_norm - diagonal_elementwise_sum_square;
+    return f - diagonal_elementwise_sum_square;
 }
 
 /* ----------------------- Calculate A': ---------------------------------*/

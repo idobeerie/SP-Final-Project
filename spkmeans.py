@@ -185,7 +185,7 @@ if __name__ == '__main__':
         #         res_spk[j][i] = round(res_spk[j][i], 4)
 
         for result in res_spk:
-            result = [round(num,4) for num in result]
+            result = [format(num, '.4f') for num in result]
             print(','.join(map(str, result)))
         
     if goal in["gl", "ddg", "wam"]:

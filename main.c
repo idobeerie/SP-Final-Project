@@ -14,12 +14,12 @@ int main(int argc, char** argv){
     char sepereator;
     char* goal;
     if(argc != 3){
-        printf("not enough arguments, sory");
+        printf("An Error Has Occurred");
         return 1;
     }
     fp = fopen(argv[2], "r");
     if(fp == NULL){
-        printf("file not found");
+        printf("An Error Has Occurred");
         return 1;
     }
     goal = argv[1];  
@@ -38,6 +38,10 @@ int main(int argc, char** argv){
         }
     }
     centroids = allocateMatrix(n, d);
+    if(centroids == NULL){
+        printf("An Error Has Occurred");
+        exit(-1);
+    }
     rewind(fp);
     for(int i = 0; i < n; i++){
         for(int j = 0; j < d; j++){
@@ -70,7 +74,7 @@ int main(int argc, char** argv){
         free_contiguous_mat(laplacian);
     }
     else if(strcmp("jacobi", goal) == 1){
-        printf("invalid goal");
+        printf("An Error Has Occurred");
     }
     if(strcmp("gl", goal) != 0){
         free_contiguous_mat(adj_matrix);
