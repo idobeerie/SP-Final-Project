@@ -6,6 +6,10 @@ import os
 import random
 import mykmeanssp as km
 
+
+
+np.random.seed(0)
+
 ###
 def distance(arr1, arr2):
     d = 0
@@ -121,7 +125,6 @@ def init_centroids(data, num_clusters):
 
 if __name__ == '__main__':
 
-    np.random.seed(0)
     eps = 0.0
     k = 0
 
