@@ -28,19 +28,6 @@ import sys
 #    GOOD LUCK
 
 
-def validate_valgrind(valgrind_output, file_name):
-# Parse the Valgrind output for memory leaks
-    leak_pattern = re.compile(r"definitely lost: (\d+) bytes in (\d+) blocks")
-    leak_matches = leak_pattern.search(valgrind_output.stderr)
-
-    # Check if there were any memory leaks
-    if leak_matches is None:
-        print(f"No memory leaks detected in {file_name}!")
-    else:
-        bytes_lost = int(leak_matches.group(1))
-        blocks_lost = int(leak_matches.group(2))
-        print(f"Memory leak detected: {bytes_lost} bytes in {blocks_lost} blocks in {file_name}")
-
 def main(no_py, no_c, no_g):
     print("Running tests")
     print("\n##########################\n")
@@ -116,6 +103,24 @@ def main(no_py, no_c, no_g):
     print("Finished running Py part")
     print("\n##########################\n")
 
+    if not no_g:
+        print("Valgrinding...")
+        for filename in os.listdir('tests/test_batch'):
+            if filename.endswith('_j.txt'):
+                print(f"Valgrinding jacobi in {filename.split('_')[0]}")
+                command = f"valgrind --leak-check=full --track-origins=yes ./spkmeans jacobi tests/test_batch/{filename} "
+                valgrind_output = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
+                print(valgrind_output.stderr)
+            else:
+                for goal in ['wam', 'ddg', 'gl']:
+                    print(f"Valgrinding {goal} in {filename.split('.')[0]}")
+                    command = f"valgrind --leak-check=full --track-origins=yes ./spkmeans {goal} tests/test_batch/{filename} "
+                    valgrind_output = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
+                    print(valgrind_output.stderr)
+    else:
+        print("Skipping Valgrind")
+
+
     if not no_c:
         print("Comparing C part:\n")
         command = f'python3 compare_results.py tests/ans_batch tests/c_ret_batch'
@@ -129,24 +134,6 @@ def main(no_py, no_c, no_g):
         result = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
         output = result.stdout
         print(output)
-
-    if not no_g:
-        print("Valgrinding...")
-        for filename in os.listdir('tests/test_batch'):
-            if filename.endswith('_j.txt'):
-                print(f"Valgrinding jacobi in {filename.split('_')[0]}")
-                command = f"valgrind ./spkmeans jacobi tests/test_batch/{filename}"
-                valgrind_output = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
-                validate_valgrind(valgrind_output, filename)
-            else:
-                for goal in ['wam', 'ddg', 'gl']:
-                    print(f"Valgrinding {goal} in {filename.split('.')[0]}")
-                    command = f"valgrind ./spkmeans {goal} tests/test_batch/{filename}"
-                    valgrind_output = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
-                    validate_valgrind(valgrind_output, filename)
-    else:
-        print("Skipping Valgrind")
-
 
 if __name__ == "__main__":
     no_py = True if  'no_py' in sys.argv else False

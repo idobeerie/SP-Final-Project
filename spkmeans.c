@@ -385,7 +385,7 @@ Jacobi_output *jacobi(double **A, int n)
     A_tag = calc_A_tag(alloc_nXn_matrix(n), A, n, P);
 
     multiply_rotation_matrix(V, P, n);
-    while (calc_of_f_square(A, n) - calc_of_f_square(A_tag, n) > EPSILON && i <= MAX_JACOBI_ITERS)
+    while (calc_of_f_square(A, n) - calc_of_f_square(A_tag, n) > EPSILON && i < MAX_JACOBI_ITERS)
     {
         temp = A;
         A = A_tag;

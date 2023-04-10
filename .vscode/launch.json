@@ -9,7 +9,7 @@
             "program": "${workspaceFolder}/spkmeans.py",
             "console": "integratedTerminal",
             "cwd": "${workspaceFolder}",
-            "args":["spk","./tests/test_batch/test10.txt"]
+            "args":["spk","./tests/test_batch/test5.txt"]
         },
         {
             "name": "(gdb) Launch",
@@ -18,7 +18,7 @@
             "program": "${workspaceFolder}/spkmeans",
             "args": [
                 "jacobi",
-                "t.txt"
+                "s.txt"
             ],
             "stopAtEntry": false,
             "cwd": "${fileDirname}",

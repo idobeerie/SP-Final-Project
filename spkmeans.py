@@ -8,7 +8,6 @@ import mykmeanssp as km
 
 
 
-np.random.seed(0)
 
 ###
 def distance(arr1, arr2):
@@ -124,7 +123,7 @@ def init_centroids(data, num_clusters):
 
 
 if __name__ == '__main__':
-
+    np.random.seed(0)
     eps = 0.0
     k = 0
 
@@ -171,7 +170,7 @@ if __name__ == '__main__':
         max_dif = sys.float_info.min
         max_dif_idx = 0
         if k ==0:
-            for i in range(0, int(len(eigenvaulues_arr) /2)+1):
+            for i in range(0, int(len(eigenvaulues_arr) /2)):
                 if math.fabs(eigenvaulues_arr[i] - eigenvaulues_arr[i+1]) > max_dif:
                     max_dif = math.fabs(eigenvaulues_arr[i] - eigenvaulues_arr[i+1])
                     max_dif_idx = i+1
